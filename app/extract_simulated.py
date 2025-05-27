@@ -2,6 +2,11 @@ from spotify_api.auth import get_spotify_credentials
 from spotify_api.search import search_artist
 from spotify_api.top_tracks import get_artist_top_tracks
 from utils.file_writer import save_json
+from utils.session import get_session_id
+import time
+
+session_id = get_session_id(force_new=True)
+print(f"Session ID : {session_id}")
 
 def main():
     sp = get_spotify_credentials()
@@ -22,9 +27,10 @@ def main():
                     track["artist_id"] = artist_id
                     track["genres"] = genres
                     all_tracks.append(track)
+                    time.sleep(0.3)
 
-    print(f"✅ {len(all_tracks)} morceaux récupérés depuis {len(artist_names)} artistes.")
-    save_json(all_tracks, "app/data/simulated/", prefix="simulated_tracks")
+    print(f"{len(all_tracks)} morceaux récupérés depuis {len(artist_names)} artistes.")
+    save_json(all_tracks, f"app/data/simulated/{session_id}/", prefix="simulated_tracks")
 
 if __name__ == "__main__":
     main()
