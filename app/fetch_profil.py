@@ -3,6 +3,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import spotipy
 from utils.session import get_session_id
 from utils.file_writer import save_json
+from utils.upload_to_s3 import upload_file_to_s3
 
 # Scopes nécessaires
 SCOPE = "user-read-private user-top-read"
@@ -33,7 +34,16 @@ def main():
         "top_artist_long": get_top_artist(sp, "long_term")
     }
 
-    save_json(summary, data_path, prefix="profile_summary")
+    save_json(summary, data_path, prefix="fetch_profile")
+
+    # Trouver le fichier sauvegardé
+    saved_files = [f for f in os.listdir(data_path) if f.startswith("fetch_profile") and f.endswith(".json")]
+    if saved_files:
+        upload_file_to_s3(
+            os.path.join(data_path, saved_files[0]),
+            "spotify-listening-intelligence",
+            f"user/{session_id}/{saved_files[0]}"
+        )
     print(f"✅ Profil résumé enregistré dans {data_path}")
 
 if __name__ == "__main__":

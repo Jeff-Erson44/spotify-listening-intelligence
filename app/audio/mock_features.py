@@ -40,7 +40,8 @@ GENRE_PROFILES = {
     "afrohouse":   {"danceability": (0.8, 0.95), "energy": (0.7, 0.9), "valence": (0.5, 0.85), "speechiness": (0.03, 0.06)},
     "soft pop":    {"danceability": (0.6, 0.85), "energy": (0.4, 0.7), "valence": (0.5, 0.8), "speechiness": (0.03, 0.08)},
     "azonto":      {"danceability": (0.85, 0.98), "energy": (0.6, 0.85), "valence": (0.7, 0.95), "speechiness": (0.05, 0.15)},
-    "jersey":      {"danceability": (0.85, 0.98), "energy": (0.7, 0.95), "valence": (0.5, 0.8), "speechiness": (0.04, 0.1)}
+    "jersey":      {"danceability": (0.85, 0.98), "energy": (0.7, 0.95), "valence": (0.5, 0.8), "speechiness": (0.04, 0.1)},
+    "new wave":    {"danceability": (0.6, 0.85), "energy": (0.6, 0.9), "valence": (0.4, 0.7), "speechiness": (0.03, 0.07)}
 }
 
 
@@ -68,7 +69,10 @@ GENRE_FALLBACKS = {
     "fun rock": "rock",
     "jersey club": "jersey",
     "baltimore club": "jersey",
-    "philly club": "jersey"
+    "philly club": "jersey",
+    "newwave": "new wave",
+    "synthwave": "new wave",
+    "post-punk": "new wave"
 }
 
 DEFAULT_GENRE = "pop"

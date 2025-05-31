@@ -34,7 +34,11 @@ def main():
     save_json(enriched, data_path, prefix="enriched_simulated")
     enriched_filename = [f for f in os.listdir(data_path) if f.startswith("enriched_simulated") and f.endswith(".json")]
     if enriched_filename:
-        upload_file_to_s3(os.path.join(data_path, enriched_filename[0]), f"simulated/{session_id}/{enriched_filename[0]}")
+        upload_file_to_s3(
+            local_file_path=os.path.join(data_path, enriched_filename[0]),
+            bucket_name="spotify-listening-intelligence",
+            s3_key=f"simulated/{session_id}/{enriched_filename[0]}"
+        )
     print(f"{len(enriched)} morceaux enrichis avec features simulés")
 
 if __name__ == "__main__":
