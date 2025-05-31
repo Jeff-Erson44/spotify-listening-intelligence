@@ -9,19 +9,22 @@ SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
 SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
 SPOTIPY_REDIRECT_URI = os.getenv("SPOTIPY_REDIRECT_URI")
 
-#Fonction pour authentifié via Oaut
+if not all([SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, SPOTIPY_REDIRECT_URI]):
+    raise ValueError("Variables d'environnement SPOTIPY manquantes. Vérifie ton fichier .env.")
+
+#  Authentification OAuth pour utilisateur avec scopes
 def get_spotify_client_oauth(scope=None):
     auth_manager = SpotifyOAuth(
         client_id=SPOTIPY_CLIENT_ID,
         client_secret=SPOTIPY_CLIENT_SECRET,
-        redirect_uri=SPOTIPY_REDIRECT_URI, 
+        redirect_uri=SPOTIPY_REDIRECT_URI,
         scope=scope,
         show_dialog=True
     )
     return spotipy.Spotify(auth_manager=auth_manager)
 
-#Focntion pour retourner un client spotipy via credentials sans compte
-def get_spotify_credentials():
+# Authentification sans compte utilisateur (client credentials)
+def get_spotify_client_credentials():
     auth_manager = SpotifyClientCredentials(
         client_id=SPOTIPY_CLIENT_ID,
         client_secret=SPOTIPY_CLIENT_SECRET

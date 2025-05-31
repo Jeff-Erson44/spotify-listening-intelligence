@@ -1,57 +1,45 @@
-import os
 import json
-from spotify_api.auth import get_spotify_client_oauth
-from spotify_api.audio_features import get_audio_features_in_batches
+import os
 from utils.file_writer import save_json
+from audio.mock_features import generate_mock_features_by_genre
 from utils.session import get_session_id
+from utils.upload_to_s3 import upload_file_to_s3
 
-SCOPE = "user-read-recently-played"
+session_id = get_session_id()
+data_path = f"app/data/user/{session_id}/"
 
-def get_latest_file(directory):
-    files = [f for f in os.listdir(directory) if f.endswith(".json")]
-    files.sort(reverse=True)
-    return os.path.join(directory, files[0]) if files else None 
-
-def extract_track_id(data):
-    return [
-        item["track"]["id"]
-        for item in data
-        if item.get("track") and item["track"].get("id")
-    ]
-    
 def main():
-    session_id = get_session_id()
-    data_path = f"app/data/user/{session_id}/"
+    # Charge le dernier fichier user pour la session
+    files = [f for f in os.listdir(data_path) if f.startswith("recently_played") and f.endswith(".json")]
+    files.sort(reverse=True)
+    latest_file = os.path.join(data_path, files[0])
 
-    latest_file = get_latest_file(data_path)
-    if not latest_file:
-        print("Aucun fichier trouvé dans la session.")
-        return
-    
-    print(f"Fichier chargé: {latest_file}")
     with open(latest_file, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        
-    track_ids = extract_track_id(data)
-    print(f"{len(track_ids)} morceaux à enrichir")
-    
-    sp = get_spotify_client_oauth(scope=SCOPE)
-    audio_features = get_audio_features_in_batches(sp, track_ids)
-    
-    associate = []
-    for item, features in zip(data, audio_features):
-        if features:
-            associate.append({
-                "track_name" : item["track"]["name"],
-                "artist_name": item["track"]["artists"][0]["name"],
-                "played_at": item["played_at"],
-                "id": item["track"]["id"],
-                **features,
-                "session_id": session_id
-            })
-    
-    save_json(associate, directory=data_path, prefix="enriched_user")
-    print(f"{len(associate)} morceaux enrichis avec succès")
+        tracks = json.load(f)
+
+    print(f"Chargé : {latest_file} – {len(tracks)} morceaux")
+
+    #  Ajout des audio_features 
+    enriched = []
+    for track in tracks:
+        genres = track.get("genres", [])
+        if not genres:
+            genres = ["pop"]  # valeur par défaut si aucun genre
+        genre = genres[0]
+        features = generate_mock_features_by_genre(genre)
+        track.update(features)
+        track["session_id"] = session_id
+        enriched.append(track)
+
+    save_json(enriched, data_path, prefix="enriched_user")
+    enriched_filename = [f for f in os.listdir(data_path) if f.startswith("enriched_user") and f.endswith(".json")]
+    if enriched_filename:
+        upload_file_to_s3(
+            os.path.join(data_path, enriched_filename[0]),
+            "spotify-listening-intelligence",
+            f"user/{session_id}/{enriched_filename[0]}"
+        )
+    print(f"{len(enriched)} morceaux enrichis avec features simulés")
 
 if __name__ == "__main__":
     main()
