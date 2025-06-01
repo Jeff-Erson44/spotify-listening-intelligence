@@ -6,6 +6,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from app.utils.session import get_session_id
 from app.analyze.emotion_mapper import map_emotion
+from app.utils.upload_to_s3 import upload_file_to_s3
 
 EMOTION_COLORS = {
     "euphorie / joie": "#FFD700",
@@ -71,6 +72,15 @@ def generate_profile_summary(session_id: str, mode: str = "user") -> dict:
 
     summary["genres"] = list(unique_genres.values())
 
+     # Sauvegarde en local
+    output_path = os.path.join(session_path, f"profile_summary_{session_id}.json")
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=4, ensure_ascii=False)
+
+    # Upload vers S3
+    s3_key = f"{mode}/{session_id}/profile_summary_{session_id}.json"
+    upload_file_to_s3(output_path, "spotify-listening-intelligence", s3_key)
+
     return summary
 if __name__ == "__main__":
     session_id = get_session_id()
@@ -87,7 +97,7 @@ if __name__ == "__main__":
     summary = generate_profile_summary(session_id, mode)
     print(json.dumps(summary, indent=4))
 
-    # Affichage des émotions détectées (uniques)
+    # Affichage des émotions détectées
     print(" Émotions détectées :")
     printed_emotions = set()
     for genre_summary in summary["genres"]:
