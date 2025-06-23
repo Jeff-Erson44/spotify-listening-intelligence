@@ -1,7 +1,7 @@
 def get_artist_top_tracks(sp, artist_id, limit=5):
-    """
-    Retourne les meilleurs morceaux d’un artiste donné .
-    """
+
+    #Retourne les meilleurs morceaux d’un artiste donné .
+
     try:
         results = sp.artist_top_tracks(artist_id)
         tracks = results.get("tracks", [])[:limit]

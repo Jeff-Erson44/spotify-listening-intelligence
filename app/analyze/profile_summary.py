@@ -4,7 +4,7 @@ from collections import Counter
 from statistics import mean
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from app.utils.session import get_session_id
+from app.utils.session_manager import get_active_session
 from app.analyze.emotion_mapper import map_emotion
 from app.utils.upload_to_s3 import upload_file_to_s3
 
@@ -22,16 +22,16 @@ EMOTION_COLORS = {
     "neutre / équilibré": "#C0C0C0"
 }
 
-def generate_profile_summary(session_id: str, mode: str = "user") -> dict:
-    base_dir = f"app/data/{mode}"
-    prefix = "enriched_user" if mode == "user" else "enriched_simulated"
-    session_path = os.path.join(base_dir, session_id)
-    
-    files = [f for f in os.listdir(session_path) if f.startswith(prefix) and f.endswith(".json")]
+def generate_profile_summary() -> dict:
+    session_id = get_active_session()
+    base_dir = f"data/{session_id}"
+    session_path = base_dir
+
+    files = [f for f in os.listdir(session_path) if f.endswith(".json") and ("enriched" in f or "selected_artists" in f)]
     files.sort(reverse=True)
-    
+
     if not files:
-        raise FileNotFoundError(f"Aucun fichier enrichi trouvé pour la session {session_id} dans {mode}")
+        raise FileNotFoundError(f"Aucun fichier enrichi trouvé pour la session {session_id} dans {session_path}")
     
     file_path = os.path.join(session_path, files[0])
     with open(file_path, "r", encoding="utf-8") as f:
@@ -78,27 +78,16 @@ def generate_profile_summary(session_id: str, mode: str = "user") -> dict:
         json.dump(summary, f, indent=4, ensure_ascii=False)
 
     # Upload vers S3
-    s3_key = f"{mode}/{session_id}/profile_summary_{session_id}.json"
+    s3_key = f"{session_id}/profile_summary_{session_id}.json"
     upload_file_to_s3(output_path, "spotify-listening-intelligence", s3_key)
 
     return summary
 if __name__ == "__main__":
-    session_id = get_session_id()
-    user_path = os.path.join("app/data/user", session_id)
-    simulated_path = os.path.join("app/data/simulated", session_id)
-
-    if os.path.exists(user_path):
-        mode = "user"
-    elif os.path.exists(simulated_path):
-        mode = "simulated"
-    else:
-        raise FileNotFoundError(f"Aucun dossier trouvé pour la session {session_id} dans 'user' ou 'simulated'.")
-
-    summary = generate_profile_summary(session_id, mode)
-    print(json.dumps(summary, indent=4))
+    summary = generate_profile_summary()
+    print(json.dumps(summary, indent=4, ensure_ascii=False))
 
     # Affichage des émotions détectées
-    print(" Émotions détectées :")
+    print("\nÉmotions détectées :")
     printed_emotions = set()
     for genre_summary in summary["genres"]:
         emotion = genre_summary["emotion"]

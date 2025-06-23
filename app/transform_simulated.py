@@ -6,11 +6,11 @@ from utils.session import get_session_id
 from utils.upload_to_s3 import upload_file_to_s3
 
 session_id = get_session_id()
-data_path = f"app/data/simulated/{session_id}/"
+data_path = f"data/{session_id}/"
 
 def main():
     # Charge le dernier fichier simulé pour la session
-    files = [f for f in os.listdir(data_path) if f.startswith("simulated_tracks") and f.endswith(".json")]
+    files = [f for f in os.listdir(data_path) if f.startswith("selected_artists") and f.endswith(".json")]
     files.sort(reverse=True)
     latest_file = os.path.join(data_path, files[0])
 
@@ -37,7 +37,7 @@ def main():
         upload_file_to_s3(
             local_file_path=os.path.join(data_path, enriched_filename[0]),
             bucket_name="spotify-listening-intelligence",
-            s3_key=f"simulated/{session_id}/{enriched_filename[0]}"
+            s3_key=f"{session_id}/{enriched_filename[0]}"
         )
     print(f"{len(enriched)} morceaux enrichis avec features simulés")
 
