@@ -1,10 +1,13 @@
 import os
 import json
+from utils.upload_to_s3 import upload_file_to_s3
 from utils.session import get_spotify_client, get_session_id
+from utils.session import reset_session
 from spotify_api.search import search_artists
 from spotify_api.top_tracks import get_artist_top_tracks
 
 def simulate_artist_selection(market="US", session_id=None):
+    reset_session()
     #On verifer que linstance spotify est OK / on vérife et recupere le numero de session / on crée le fichier dans le bon chemin
     sp = get_spotify_client()
     session_id = session_id or get_session_id()
@@ -61,5 +64,16 @@ def simulate_artist_selection(market="US", session_id=None):
 
     print(f"\n {len(selected_artists)} artistes sauvegardés dans {output_file}")
     
+    
+    # Enregistrement dans un bucket S3
+    saved_files = [f for f in os.listdir(f"data/{session_id}/") if f.startswith("selected_artist") and f.endswith(".json")]
+    if saved_files:
+        file_path = os.path.join(f"data/{session_id}/", saved_files[0])
+        upload_file_to_s3(
+            file_path,
+            "spotify-listening-intelligence",
+            f"{session_id}/{saved_files[0]}"
+        )
+        print("Fichier utilisateur uploadé vers S3.")
 if __name__ == "__main__":
     simulate_artist_selection()

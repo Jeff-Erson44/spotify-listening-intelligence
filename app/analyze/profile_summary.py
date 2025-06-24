@@ -82,6 +82,23 @@ def generate_profile_summary() -> dict:
         ],
     }
 
+    # Génération automatique de description à partir des émotions principales
+    def generate_emotion_description(emotions):
+        if not emotions or len(emotions) < 3:
+            return "Ton univers musical est varié et nuancé, révélant une palette émotionnelle difficile à cerner."
+        
+        e1, e2, e3 = emotions[0], emotions[1], emotions[2]
+        templates = [
+            f"Ton paysage sonore oscille entre {e1} et {e2}, avec une touche persistante de {e3}.",
+            f"On sent une énergie marquée par {e1}, enrichie par des élans de {e2} et des nuances de {e3}.",
+            f"Entre {e1} et {e2}, ta musique trace un chemin intime, ponctué de moments teintés de {e3}.",
+            f"Comme une brise émotionnelle, ta playlist parcourt {e1}, frôle {e2} et s’attarde sur {e3}.",
+            f"Ton univers musical mélange subtilement {e1}, {e2} et {e3}, créant une atmosphère unique et évocatrice."
+        ]
+        return templates[hash(e1 + e2 + e3) % len(templates)]
+
+    summary["description_auto"] = generate_emotion_description(top_emotions)
+
     output_path = os.path.join(session_path, f"profile_summary_{session_id}.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=4, ensure_ascii=False)

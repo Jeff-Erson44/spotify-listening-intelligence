@@ -1,3 +1,4 @@
+import uuid
 import boto3
 from botocore.exceptions import NoCredentialsError
 import os
@@ -28,3 +29,10 @@ def upload_to_s3(file_path: str, bucket: str, key: str):
         print("❌ AWS credentials not found.")
     except Exception as e:
         print(f"❌ Failed to upload to S3: {e}")
+        
+def reset_session() -> str:
+    new_session_id = str(uuid.uuid4())
+    with open(SESSION_FILE, "w") as f:
+        json.dump({"active_session": new_session_id}, f)
+    upload_to_s3(SESSION_FILE, BUCKET_NAME, KEY_NAME)
+    return new_session_id

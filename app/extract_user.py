@@ -4,6 +4,7 @@ from utils.file_writer import save_json
 from utils.session import get_session_id
 from utils.upload_to_s3 import upload_file_to_s3
 from utils.session_manager import set_active_session
+from utils.session_manager import reset_session
 import os
 
 
@@ -11,6 +12,7 @@ import os
 SCOPE = "user-read-recently-played user-read-private"
 
 def main():
+    reset_session()
     sp = get_spotify_client_oauth(scope=SCOPE)
     print("Connexion OAuth réussie.")
     

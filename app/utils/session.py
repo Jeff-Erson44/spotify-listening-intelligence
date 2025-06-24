@@ -3,6 +3,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os 
 from dotenv import load_dotenv
+from utils.session_manager import set_active_session
 
 load_dotenv()
 
@@ -41,6 +42,7 @@ def reset_session():
     global _spotify_client, _session_id
     _spotify_client = None
     _session_id = None
+    set_active_session(get_session_id())
 
 if __name__ == "__main__":
     print("Fichier session.py exécuté avec succès. Spotify client prêt :", is_authenticated())
