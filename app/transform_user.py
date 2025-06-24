@@ -1,9 +1,10 @@
 import json
-from utils.file_writer import save_json
-from audio.mock_features import generate_mock_features_by_genre
 import os
 from utils.upload_to_s3 import upload_file_to_s3
+from utils.file_writer import save_json
+from audio.mock_features import generate_mock_features_by_genre
 from utils.session_manager import get_active_session
+from datetime import datetime
 
 session_id = get_active_session()
 if not session_id:
@@ -44,16 +45,18 @@ def main():
         track["session_id"] = session_id
         enriched.append(track)
 
-    save_json(enriched, data_path, prefix="enriched")
-    enriched_filename = [f for f in os.listdir(data_path) if f == "enriched.json"]
-    if enriched_filename:
-        print(f"✅ Données sauvegardées dans : {os.path.join(data_path, enriched_filename[0])}")
+     # Enregistrement structuré dans le dossier de session
+    save_json(tracks, directory=f"data/{session_id}/", prefix="transform_tracks")
+    
+    # Enregistrement dans un bucket S3
+    saved_files = [f for f in os.listdir(f"data/{session_id}/") if f.startswith("transform_tracks") and f.endswith(".json")]
+    if saved_files:
+        file_path = os.path.join(f"data/{session_id}/", saved_files[0])
         upload_file_to_s3(
-            os.path.join(data_path, enriched_filename[0]),
+            file_path,
             "spotify-listening-intelligence",
-            f"{session_id}/{enriched_filename[0]}"
+            f"{session_id}/{saved_files[0]}"
         )
-    print(f"{len(enriched)} morceaux enrichis avec features simulés")
-
+        print("Fichier utilisateur uploadé vers S3.")
 if __name__ == "__main__":
     main()

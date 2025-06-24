@@ -9,25 +9,27 @@ from app.analyze.emotion_mapper import map_emotion
 from app.utils.upload_to_s3 import upload_file_to_s3
 
 EMOTION_COLORS = {
-    "euphorie / joie": "#FFD700",
-    "sérénité / détente": "#ADD8E6",
-    "enthousiasme / dynamisme": "#FFA500",
-    "confiance / motivation": "#FF8C00",
-    "envie de danser / groove": "#00FF7F",
-    "tristesse / solitude": "#00008B",
-    "colère / tension": "#FF0000",
-    "mélancolie / introspection": "#800080",
-    "nostalgie / douceur": "#FFC0CB",
-    "fête / excitation": "#FF69B4",
-    "neutre / équilibré": "#C0C0C0"
+    "joie": "#FDD835",
+    "détente": "#A3D5FF",
+    "enthousiasme": "#FFB74D",
+    "motivation": "#FF7043",
+    "envie de danser": "#4DB6AC",
+    "excitation": "#D81B90",
+    "tristesse": "#7986CB",
+    "colère": "#EF5350",
+    "mélancolie": "#B39DDB",
+    "nostalgie": "#F3C6F1",
+    "neutre": "#B0BEC5",
+    "confiance": "#81C784",
 }
+
 
 def generate_profile_summary() -> dict:
     session_id = get_active_session()
     base_dir = f"data/{session_id}"
     session_path = base_dir
 
-    files = [f for f in os.listdir(session_path) if f.endswith(".json") and ("enriched" in f or "selected_artists" in f)]
+    files = [f for f in os.listdir(session_path) if f.endswith(".json") and ("transform_tracks" in f or "selected_artists" in f)]
     files.sort(reverse=True)
 
     if not files:
@@ -37,62 +39,65 @@ def generate_profile_summary() -> dict:
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    from collections import defaultdict
-
-    genre_stats = defaultdict(lambda: {"valence": [], "energy": [], "danceability": []})
+    emotion_counter = Counter()
+    genre_counter = Counter()
+    valences, energies, dances = [], [], []
 
     for track in data:
-        genre = track.get("genres", ["pop"])
-        genre = genre[0] if genre else "pop"
+        valence = track.get("valence", 0)
+        energy = track.get("energy", 0)
+        dance = track.get("danceability", 0)
+        genre = track.get("genres", ["pop"])[0] if track.get("genres") else "pop"
 
-        genre_stats[genre]["valence"].append(track.get("valence", 0))
-        genre_stats[genre]["energy"].append(track.get("energy", 0))
-        genre_stats[genre]["danceability"].append(track.get("danceability", 0))
+        emotion = map_emotion(valence, energy, dance)
+
+        emotion_counter[emotion] += 1
+        genre_counter[genre] += 1
+
+        valences.append(valence)
+        energies.append(energy)
+        dances.append(dance)
+
+    top_genres = [g for g, _ in genre_counter.most_common(3)]
+    top_emotions = [e for e, _ in emotion_counter.most_common(3)]
+    dominant_emotion = emotion_counter.most_common(1)[0][0] if emotion_counter else None
+    dominant_genre = genre_counter.most_common(1)[0][0] if genre_counter else None
 
     summary = {
         "session_id": session_id,
-        "genres": []
+        "genre_dominant": dominant_genre,
+        "top_3_genres": top_genres,
+        "danse_moyenne": round(mean(dances), 3) if dances else 0,
+        "energie_moyenne": round(mean(energies), 3) if energies else 0,
+        "emotion_globale": dominant_emotion,
+        "emotions_principales": top_emotions,
+        "emotions_dominantes": [e for e, _ in emotion_counter.most_common(4)],
+        "couleur_dominante": EMOTION_COLORS.get(dominant_emotion, "#CCCCCC"),
+        "emotions_details": [
+            {
+                "emotion": emotion,
+                "color": EMOTION_COLORS.get(emotion, "#CCCCCC")
+            }
+            for emotion in top_emotions
+        ],
     }
 
-    unique_genres = {}
-    for genre, stats in genre_stats.items():
-        genre_key = genre.lower()
-        if genre_key not in unique_genres:
-            avg_valence = round(mean(stats["valence"]), 3)
-            avg_energy = round(mean(stats["energy"]), 3)
-            avg_dance = round(mean(stats["danceability"]), 3)
-            emotion = map_emotion(avg_valence, avg_energy, avg_dance)
-            unique_genres[genre_key] = {
-                "genre": genre,
-                "average_valence": avg_valence,
-                "average_energy": avg_energy,
-                "average_danceability": avg_dance,
-                "emotion": emotion
-            }
-
-    summary["genres"] = list(unique_genres.values())
-
-     # Sauvegarde en local
     output_path = os.path.join(session_path, f"profile_summary_{session_id}.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=4, ensure_ascii=False)
-
-    # Upload vers S3
-    s3_key = f"{session_id}/profile_summary_{session_id}.json"
-    upload_file_to_s3(output_path, "spotify-listening-intelligence", s3_key)
+        
+    # Enregistrement dans un bucket S3
+    saved_files = [f for f in os.listdir(f"data/{session_id}/") if f.startswith("profile") and f.endswith(".json")]
+    if saved_files:
+        file_path = os.path.join(f"data/{session_id}/", saved_files[0])
+        upload_file_to_s3(
+            file_path,
+            "spotify-listening-intelligence",
+            f"{session_id}/{saved_files[0]}"
+        )
+        print("Fichier utilisateur uploadé vers S3.")
 
     return summary
 if __name__ == "__main__":
     summary = generate_profile_summary()
-    print(json.dumps(summary, indent=4, ensure_ascii=False))
-
-    # Affichage des émotions détectées
-    print("\nÉmotions détectées :")
-    printed_emotions = set()
-    for genre_summary in summary["genres"]:
-        emotion = genre_summary["emotion"]
-        if emotion not in printed_emotions:
-            print(f"• {emotion}")
-            color = EMOTION_COLORS.get(emotion, "#CCCCCC")
-            print(f"  → Couleur associée : {color}")
-            printed_emotions.add(emotion)
+    print(json.dumps(summary, indent=4, ensure_ascii=False))        
