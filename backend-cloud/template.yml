@@ -1,0 +1,66 @@
+# Entete AWS Template 
+AWSTemplateFormatVersion: '2010-09-09'
+# permet à CloudFormation de comprendre AWS SAM
+Transform: AWS::Serverless-2016-10-31
+Description: >-
+  Application serverless Spotify Listening Intelligence - Lambda + API Gateway + S3
+
+#Définir les paramètres globaux pour les fonctions lambda
+Globals:
+  Function: 
+    Timeout: 30
+    Runtime: python3.10
+    MemorySize: 256
+    Environment:
+      Variables:
+        BUCKET_NAME: !Ref SpotifyDataBucket
+
+Resources: 
+  #S3 Bucket pour stocker les données
+  SpotifyDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub spotify-listening-intelligence-${AWS::AccountId}
+
+  ExtractUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: extract/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Timeout: 30
+      MemorySize: 256
+      Policies: 
+        - S3WritePolicy:
+            BucketName: !Ref SpotifyDataBucket
+      Events:
+        ApiPostExtractUser:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpotifyApi
+            Path: /extract-user
+            Method: post
+
+  SpotifyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: SpotifyListeningApi
+      StageName: Prod
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          title: "SpotifyListeningApi"
+          version: "1.0"
+        paths:
+          /extract-user:
+            post:
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ExtractUserFunction.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+              responses: {}
+
+Outputs:
+  ExtractUserApiUrl:
+    Description: "URL de l'API POST /extract-user"
+    Value: !Sub "https://${SpotifyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/extract-user"
