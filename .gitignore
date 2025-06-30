@@ -1,7 +1,21 @@
-venv/
-__pycache__/
+# Environnements & fichiers temporaires
 .env
-*.json
-data/
-.cache
-.session
+__pycache__/
+*.pyc
+*.zip
+
+# Dossiers de packaging Lambda
+lambda_package*/
+
+# AWS SAM
+.aws-sam/
+backend-cloud/.aws-sam/
+
+# IDE & OS
+.vscode/
+.DS_Store
+env/*
+.DS_Store
+fecthtoken.py
+
+.DS_Store

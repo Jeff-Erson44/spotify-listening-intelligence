@@ -41,6 +41,89 @@ Resources:
             Path: /extract-user
             Method: post
 
+
+  SearchArtistFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: search-simulate/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref SpotifyDataBucket
+      Events:
+        ApiPostSearchArtist:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpotifyApi
+            Path: /search-artist
+            Method: post
+
+  CreateSessionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri:  create-session/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        ApiPostCreateSession:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpotifyApi
+            Path: /create-session
+            Method: post
+          
+  ExtractSimulatedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: extract-simulated/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref SpotifyDataBucket
+      Events:
+        ApiPostExtractSimulated:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpotifyApi
+            Path: /extract-simulated
+            Method: post
+
+  TransformFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: transform/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${SpotifyDataBucket}/data/*
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: 
+                - !Sub arn:aws:s3:::${SpotifyDataBucket}/data/*
+                - !Sub arn:aws:s3:::${SpotifyDataBucket}/logs/*
+      Events:
+        ApiPostTransform:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpotifyApi
+            Path: /transform
+            Method: post
+
   SpotifyApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -59,8 +142,47 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
               responses: {}
-
+          /search-artist:
+            post:
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SearchArtistFunction.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+              responses: {}
+          /create-session:
+            post:
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateSessionFunction.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+              responses: {}
+          /extract-simulated:
+            post:
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ExtractSimulatedFunction.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+              responses: {}
+          /transform:
+            post:
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TransformFunction.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+              responses: {}
 Outputs:
   ExtractUserApiUrl:
     Description: "URL de l'API POST /extract-user"
     Value: !Sub "https://${SpotifyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/extract-user"
+  SearchArtistApiUrl:
+    Description: "URL de l'API POST /search-artist"
+    Value: !Sub "https://${SpotifyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/search-artist"
+  CreateSessionApiUrl:
+    Description: "URL de l'API POST /create-session"
+    Value: !Sub "https://${SpotifyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create-session"
+  ExtractSimulatedApiUrl:
+    Description: "URL de l'API POST /extract-simulated"
+    Value: !Sub "https://${SpotifyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/extract-simulated"
+  TransformApiUrl:
+    Description: "URL de l'API POST /transform"
+    Value: !Sub "https://${SpotifyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/transform"

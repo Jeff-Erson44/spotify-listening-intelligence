@@ -4,6 +4,7 @@ import os
 import logging
 import json
 from utils.auth import get_spotify_client_credentials
+from utils.file_utils import upload_json_to_s3
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -48,7 +49,7 @@ def lambda_handler(event, context):
         logger.info(f"Returning {len(tracks)} total tracks for session: {session_id}")
 
         # Enregistrement en bucket S3
-        from utils.file_utils import upload_json_to_s3
+
         bucket_name = os.environ.get("S3_BUCKET_NAME")
         if not bucket_name:
             raise Exception("Variable d'environnement S3_BUCKET_NAME non définie.")
