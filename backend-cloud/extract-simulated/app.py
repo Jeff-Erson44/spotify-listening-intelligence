@@ -53,7 +53,7 @@ def lambda_handler(event, context):
         if not bucket_name:
             raise Exception("Variable d'environnement S3_BUCKET_NAME non définie.")
 
-        s3_key = f"data/{session_id}/simulated/top_tracks.json"
+        s3_key = f"data/{session_id}/top_tracks.json"
         upload_json_to_s3({
             "session_id": session_id,
             "tracks": tracks

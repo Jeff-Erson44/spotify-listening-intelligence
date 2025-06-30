@@ -17,7 +17,7 @@ def main():
         raise FileNotFoundError(f"Le dossier {data_path} n'existe pas. Vérifiez la session ou relancez une extraction.")
     files = [f for f in os.listdir(data_path) if f.endswith(".json")]
     input_file = None
-    # mode = "user"
+
 
     for prefix in ["recently_played", "selected_artists"]:
         matching_files = [f for f in files if f.startswith(prefix)]

@@ -45,4 +45,13 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["TransformFunction"]
 
+[function_build_definitions.4bce222b-b23b-459a-b3e2-717e6b845c80]
+codeuri = "/Users/jefferson/Desktop/spotify-listening/backend-cloud/profile"
+runtime = "python3.10"
+architecture = "x86_64"
+handler = "app.handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["GenerateProfileFunction"]
+
 [layer_build_definitions]

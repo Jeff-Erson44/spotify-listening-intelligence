@@ -114,8 +114,10 @@ Resources:
         - Effect: Allow
           Action:
           - s3:GetObject
+          - s3:ListBucket
           Resource:
-            Fn::Sub: arn:aws:s3:::${SpotifyDataBucket}/data/*
+          - Fn::Sub: arn:aws:s3:::${SpotifyDataBucket}
+          - Fn::Sub: arn:aws:s3:::${SpotifyDataBucket}/data/*
         - Effect: Allow
           Action:
           - s3:PutObject
@@ -132,6 +134,45 @@ Resources:
             Method: post
     Metadata:
       SamResourceId: TransformFunction
+  GenerateProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: GenerateProfileFunction
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+      - Statement:
+        - Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
+        - Effect: Allow
+          Action:
+          - s3:GetObject
+          - s3:ListBucket
+          Resource:
+          - Fn::Sub: arn:aws:s3:::${SpotifyDataBucket}
+          - Fn::Sub: arn:aws:s3:::${SpotifyDataBucket}/data/*
+        - Effect: Allow
+          Action:
+          - s3:PutObject
+          Resource:
+          - Fn::Sub: arn:aws:s3:::${SpotifyDataBucket}/data/*
+          - Fn::Sub: arn:aws:s3:::${SpotifyDataBucket}/logs/*
+      Events:
+        ApiPostGenerateProfile:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SpotifyApi
+            Path: /generate-profile
+            Method: post
+    Metadata:
+      SamResourceId: GenerateProfileFunction
   SpotifyApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -183,6 +224,14 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
               responses: {}
+          /generate-profile:
+            post:
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GenerateProfileFunction.Arn}/invocations
+                httpMethod: POST
+                type: aws_proxy
+              responses: {}
 Outputs:
   ExtractUserApiUrl:
     Description: URL de l'API POST /extract-user
@@ -204,3 +253,7 @@ Outputs:
     Description: URL de l'API POST /transform
     Value:
       Fn::Sub: https://${SpotifyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/transform
+  GenerateProfileApiUrl:
+    Description: URL de l'API POST /generate-profile
+    Value:
+      Fn::Sub: https://${SpotifyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/generate-profile
