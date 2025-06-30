@@ -75,12 +75,13 @@ GENRE_FALLBACKS = {
     "post-punk": "new wave"
 }
 
-DEFAULT_GENRE = "pop"
 
 def generate_mock_features_by_genre(genre_or_artist):
     key = genre_or_artist.lower()
     genre = GENRE_FALLBACKS.get(key, key)
-    profile = GENRE_PROFILES.get(genre, GENRE_PROFILES[DEFAULT_GENRE])
+    if genre not in GENRE_PROFILES:
+        raise ValueError(f"Genre inconnu : {genre}")
+    profile = GENRE_PROFILES[genre]
     return {
         "danceability": round(random.uniform(*profile["danceability"]), 3),
         "energy": round(random.uniform(*profile["energy"]), 3),
