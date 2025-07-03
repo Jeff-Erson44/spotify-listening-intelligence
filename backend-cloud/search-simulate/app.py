@@ -11,12 +11,12 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event.get("body", "{}"))
         query = body.get("query")
-        session_id = body.get("x-session-id") or event.get("headers", {}).get("x-session-id")
-
+        session_id = event.get("headers", {}).get("x-session-id")
+        if not session_id:
+            logger.warning("x-session-id manquant dans les headers.")
+            return {"statusCode": 400, "body": json.dumps({"error": "Header 'x-session-id' manquant."})}
         if not query:
             return {"statusCode": 400, "body": json.dumps({"error": "Paramètre 'query' requis."})}
-        if not session_id:
-            return {"statusCode": 400, "body": json.dumps({"error": "Paramètre 'x-session-id' requis."})}
 
         logger.info(f"Recherche d'artistes pour la requête : {query}")
 

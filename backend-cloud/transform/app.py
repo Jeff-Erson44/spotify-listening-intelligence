@@ -12,15 +12,28 @@ s3 = boto3.client("s3")
 BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "spotify-listening-data")
 
 def lambda_handler(event, context):
+    logger.info(f"Incoming event: {json.dumps(event)[:500]}")
 
     try:
-        headers = event.get("headers") or {}
-        session_id = headers.get("x-session-id")
+        if "Records" in event and "s3" in event["Records"][0]:
+            try:
+                s3_key = event["Records"][0]["s3"]["object"]["key"]
+                session_id = s3_key.split("/")[1]
+            except (KeyError, IndexError):
+                logger.error("Malformed S3 event")
+                session_id = None
+        elif isinstance(event.get("headers"), dict):
+            # Appel via API Gateway ou Postman
+            session_id = event.get("headers", {}).get("x-session-id")
+        else:
+            session_id = None
         if not session_id:
-            logger.error("Missing session_id header")
-            raise ValueError("Missing session_id")
-
-        logger.info(f"Session ID: {session_id}")
+            logger.error("Missing session_id from headers or S3 event")
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "Missing session_id"})
+            }
+        logger.info(f"x-session-id retrieved: {session_id}")
         logger.info(f"Trying to fetch key: data/{session_id}/recent_tracks.json")
         try:
             key = f"data/{session_id}/recent_tracks.json"

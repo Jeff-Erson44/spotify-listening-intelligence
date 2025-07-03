@@ -65,7 +65,10 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
+            "headers": {
+                "Content-Type": "application/json",
+                "x-session-id": session_id
+            },
             "body": json.dumps({
                 "message": "Extraction réussie",
                 "session_id": session_id,
