@@ -11,7 +11,7 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     try:
         body = json.loads(event.get("body", "{}"))
-        session_id = body.get("x-session-id") or event.get("headers", {}).get("x-session-id")
+        session_id = event.get("headers", {}).get("x-session-id")
         artists = body.get("artists", [])
 
         if not session_id:
