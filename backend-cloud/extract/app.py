@@ -13,17 +13,15 @@ def get_recent_tracks(sp, limit=50):
 
 def lambda_handler(event, context):
     try:
-        print("Début du traitement lambda")
+        print("Lambda execution started")
 
         token = None
         headers = event.get("headers", {}) or {}
 
-        # Recherche du token dans Authorization header
         auth_header = headers.get("Authorization") or headers.get("authorization")
         if auth_header and auth_header.lower().startswith("bearer "):
             token = auth_header[7:].strip()
 
-        # Sinon tentative dans les cookies
         if not token:
             cookies = headers.get("Cookie") or headers.get("cookie") or ""
             for cookie in cookies.split(";"):
@@ -32,19 +30,19 @@ def lambda_handler(event, context):
                     break
 
         if not token:
-            raise Exception("Token Spotify manquant dans la requête.")
-        print(f"Token Spotify reçu (début): {token[:20]}...")
+            raise Exception("Missing Spotify token in request.")
+        print(f"Spotify token received: {'present' if token else 'absent'}")
 
         sp = get_spotify_client_from_token(token)
-        print("Client Spotify initialisé")
+        print("Spotify client initialized")
 
         session_id = headers.get("x-session-id")
         if not session_id:
-            raise Exception("Header 'x-session-id' manquant.")
-        print(f"Session reçue via header : {session_id}")
+            raise Exception("Missing 'x-session-id' header.")
+        print(f"Session ID received: {session_id}")
 
         tracks = get_recent_tracks(sp, limit=50)
-        print(f"{len(tracks)} morceaux récupérés")
+        print(f"Number of tracks retrieved: {len(tracks)}")
 
         for track in tracks:
             artist_id = track["track"]["artists"][0]["id"]
@@ -56,12 +54,12 @@ def lambda_handler(event, context):
             track["genres"] = genres
 
         if not BUCKET_NAME:
-            raise Exception("Variable d'environnement S3_BUCKET_NAME non définie.")
-        print(f"Bucket S3 cible : {BUCKET_NAME}")
+            raise Exception("Environment variable S3_BUCKET_NAME is not set.")
+        print(f"Target S3 bucket: {BUCKET_NAME}")
 
         s3_key = f"data/{session_id}/recent_tracks.json"
         upload_json_to_s3(tracks, BUCKET_NAME, s3_key)
-        print("Upload vers S3 réussi")
+        print("Upload to S3 completed successfully")
 
         return {
             "statusCode": 200,
@@ -70,7 +68,7 @@ def lambda_handler(event, context):
                 "x-session-id": session_id
             },
             "body": json.dumps({
-                "message": "Extraction réussie",
+                "message": "Extraction successful",
                 "session_id": session_id,
                 "recent_tracks_count": len(tracks),
                 "uploaded_file_s3_key": s3_key,
@@ -79,7 +77,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
-        print(f"Erreur attrapée : {e}")
+        print(f"Error encountered: {e}")
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},

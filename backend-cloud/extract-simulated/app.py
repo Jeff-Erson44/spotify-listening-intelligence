@@ -20,6 +20,7 @@ def lambda_handler(event, context):
         if not isinstance(artists, list) or len(artists) < 1:
             return {"statusCode": 400, "body": json.dumps({"error": "Au moins 1 artiste est requis."})}
 
+        logger.info(f"Session ID reçu : {session_id}")
         logger.info("Creating Spotify client...")
         sp = get_spotify_client_credentials()
         tracks = []
@@ -47,7 +48,6 @@ def lambda_handler(event, context):
 
         logger.info(f"Returning {len(tracks)} total tracks for session: {session_id}")
 
-        # Enregistrement en bucket S3
         from utils.file_utils import upload_json_to_s3
         bucket_name = os.environ.get("S3_BUCKET_NAME")
         if not bucket_name:
@@ -59,7 +59,7 @@ def lambda_handler(event, context):
             "tracks": tracks
         }, bucket_name, s3_key)
 
-        logger.info(f"Upload vers S3 réussi : {s3_key}")
+        logger.info(f"Fichier JSON uploadé avec succès dans le bucket {bucket_name} avec la clé {s3_key}")
         return {
             "statusCode": 200,
             "body": json.dumps({
@@ -69,6 +69,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
+        logger.error(f"Erreur lors de l'exécution de la Lambda extract-simulated : {str(e)}")
         return {
             "statusCode": 500,
             "body": json.dumps({"error": str(e)})
