@@ -40,8 +40,8 @@ s3 = boto3.client("s3")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
 
 def lambda_handler(event, context):
-    print("Début de la lambda generate_profile")
-    print("Event reçu:", json.dumps(event))
+    print("Lambda generate_profile démarrée.")
+    print("Événement S3 reçu pour analyse.")
 
     if not S3_BUCKET_NAME:  
         return {
@@ -51,9 +51,9 @@ def lambda_handler(event, context):
 
     try:
         session_id = event["Records"][0]["s3"]["object"]["key"].split("/")[1]
-        print("Session ID extrait:", session_id)
+        print(f"Session ID extrait : {session_id}")
         key = f"data/{session_id}/enriched_tracks.json"
-        print("Clé S3 construite:", key)
+        print(f"Chemin du fichier enrichi construit : {key}")
     except (KeyError, IndexError):
         return {
             "statusCode": 400,
@@ -61,9 +61,9 @@ def lambda_handler(event, context):
         }
     
     try:
-        print("Tentative de récupération du fichier enriched_tracks.json depuis S3")
+        print("Récupération du fichier enriched_tracks.json depuis S3...")
         response = s3.get_object(Bucket=S3_BUCKET_NAME, Key=key)
-        print("Fichier enriched_tracks.json récupéré avec succès")
+        print("Fichier enriched_tracks.json récupéré avec succès.")
         data = json.loads(response['Body'].read().decode('utf-8'))
     except ClientError as e:
         if e.response['Error']['Code'] == "404":
@@ -117,14 +117,14 @@ def lambda_handler(event, context):
             "emotion_colors": emotion_colors,
         }
 
-        print("Tentative d'enregistrement du profil sur S3")
+        print("Enregistrement du profil utilisateur dans S3...")
         s3.put_object(
             Bucket=S3_BUCKET_NAME,
             Key=f"data/{session_id}/profile.json",
             Body=json.dumps(profile_data),
             ContentType="application/json"
         )
-        print("Profil enregistré avec succès dans:", f"data/{session_id}/profile.json")
+        print(f"Profil enregistré avec succès dans S3 à l'emplacement : data/{session_id}/profile.json")
 
         return {
             "statusCode": 200,
@@ -132,7 +132,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
-        print("Erreur inattendue:", str(e))
+        print(f"Erreur inattendue : {str(e)}")
         return {
             "statusCode": 500,
             "body": json.dumps({"error": str(e)})

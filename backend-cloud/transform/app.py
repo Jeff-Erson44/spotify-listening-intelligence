@@ -23,10 +23,11 @@ def lambda_handler(event, context):
                 logger.error("Malformed S3 event")
                 session_id = None
         elif isinstance(event.get("headers"), dict):
-            # Appel via API Gateway ou Postman
+            # Récupération depuis les headers HTTP (ex : API Gateway)
             session_id = event.get("headers", {}).get("x-session-id")
         else:
             session_id = None
+        logger.info(f"Session ID determined from request: {session_id}")
         if not session_id:
             logger.error("Missing session_id from headers or S3 event")
             return {
@@ -34,21 +35,19 @@ def lambda_handler(event, context):
                 "body": json.dumps({"error": "Missing session_id"})
             }
         logger.info(f"x-session-id retrieved: {session_id}")
-        logger.info(f"Trying to fetch key: data/{session_id}/recent_tracks.json")
+        logger.info(f"Attempting to fetch key: data/{session_id}/recent_tracks.json")
         try:
             key = f"data/{session_id}/recent_tracks.json"
             obj = s3.get_object(Bucket=BUCKET_NAME, Key=key)
         except s3.exceptions.NoSuchKey:
-            logger.info(f"recent_tracks.json not found, trying top_tracks.json")
+            logger.info(f"recent_tracks.json not found, attempting to fetch top_tracks.json")
             key = f"data/{session_id}/top_tracks.json"
-            logger.info(f"Trying to fetch key: {key}")
+            logger.info(f"Attempting to fetch key: {key}")
             obj = s3.get_object(Bucket=BUCKET_NAME, Key=key)
 
-        logger.info(f"S3 object metadata: {obj}")
+        logger.info(f"S3 object metadata retrieved")
         logger.info(f"Reading object body")
         raw = obj["Body"].read()
-        logger.info(f"Raw type: {type(raw)}")
-        logger.info(f"Raw content: {raw[:200]}")  # affiche les 200 premiers caractères
         if isinstance(raw, bytes):
             raw = raw.decode("utf-8")
         tracks = json.loads(raw)
@@ -70,19 +69,19 @@ def lambda_handler(event, context):
             try:
                 features = generate_mock_features_by_genre(genre)
             except ValueError:
-                logger.warning(f"Genre inconnu : {genre}, fallback vers 'pop'")
+                logger.warning(f"Unknown genre encountered: {genre}, falling back to 'pop'")
                 unknown_genres.add(genre)
                 features = generate_mock_features_by_genre("pop")
             enriched.append({**track, **features})
 
         enriched_key = f"data/{session_id}/enriched_tracks.json"
         upload_json_to_s3(enriched, BUCKET_NAME, enriched_key)
-        logger.info(f"Enriched tracks uploaded to S3: {enriched_key}")
+        logger.info(f"Enriched tracks uploaded to S3 at key: {enriched_key}")
 
         if unknown_genres:
             log_key = f"logs/{session_id}/unknown_genres.json"
             upload_json_to_s3(list(unknown_genres), BUCKET_NAME, log_key)
-            logger.info(f"Unknown genres log uploaded to S3: {log_key}")
+            logger.info(f"Unknown genres log uploaded to S3 at key: {log_key}")
 
         return {
             "statusCode": 200,
@@ -90,7 +89,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error(f"Error occurred: {e}")
         return {
             "statusCode": 500,
             "body": json.dumps({"error": str(e)})
