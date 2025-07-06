@@ -33,7 +33,14 @@ def lambda_handler(event, context):
 
             logger.info(f"Fetching top tracks for artist: {artist_name} ({artist_id})")
 
-            top_tracks = sp.artist_top_tracks(artist_id, country="US").get("tracks", [])[:5]
+            try:
+                top_tracks = sp.artist_top_tracks(artist_id, country="FR").get("tracks", [])[:5]
+            except Exception as e:
+                logger.warning(f"Failed to fetch top tracks for {artist_name} in FR market: {e}")
+                top_tracks = []
+            if not top_tracks:
+                logger.error(f"No top tracks found for {artist_name} ({artist_id}) in any market.")
+                continue
             logger.info(f"Found {len(top_tracks)} tracks for {artist_name}")
 
             fallback_genres = artist.get("genres") or ["pop"]
