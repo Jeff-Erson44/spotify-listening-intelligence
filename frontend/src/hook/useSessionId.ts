@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createSession } from "@/lib/api";
+import { createSession } from "@/lib/api/create-session";
 
 export function useSessionId (){
     const [sessionId, setSesssionId] = useState<string | null>(null);

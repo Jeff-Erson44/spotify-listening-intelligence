@@ -1,5 +1,7 @@
 "use client"
 import { useSessionId } from "@/hook/useSessionId";
+import Link from "next/link";
+
 
 export default function Home() {
   const sessionId = useSessionId();
@@ -12,6 +14,18 @@ export default function Home() {
       ) : (
         <p className="text-xl text-gray-500">Chargement du Session ID...</p>
       )}
+      <div>
+        <Link href={'/spotify'}>
+          <button>
+            Se connecter avec spotify
+          </button>
+        </Link>
+        <Link href={'/simulate'}>
+          <button>
+            Sans Spotify 
+          </button>
+        </Link>
+      </div>
     </main>
   );
 }
