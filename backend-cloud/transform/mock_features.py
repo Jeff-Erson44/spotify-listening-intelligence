@@ -126,7 +126,9 @@ GENRE_FALLBACKS = {
     "zydeco": "folk",
     "punk": "rock",
     "industrial": "electronic",
-    "citypop": "city pop"
+    "citypop": "city pop",
+    "french hip hop": "hip hop",
+    "canadian hip hop": "hip hop"
 }
 
 
