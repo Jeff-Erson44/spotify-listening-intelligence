@@ -1,103 +1,153 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [tracks, setTracks] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  // 1. Créer la session
+  useEffect(() => {
+    async function createSession() {
+      try {
+        const res = await fetch("https://az96kjgo55.execute-api.eu-west-3.amazonaws.com/prod/create-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        });
+
+        const data = await res.json();
+        console.log("Session créée:", data);
+        setSessionId(data.session_id || data.sessionId || null);
+      } catch (error) {
+        console.error("Erreur création session:", error);
+      }
+    }
+
+    createSession();
+  }, []);
+
+  // 2. Une fois session créée, appeler extract-user sans mettre le sessionId dans les headers
+  useEffect(() => {
+    if (!sessionId) return;
+
+    async function fetchRecentTracks() {
+      try {
+        const spotifyToken = "BQBGwd6z2tKZSehGosvzALSZtZGh12p2IB_3U-z5-Kd-jt8Y_yCg8Y2sd5-d1gSPKDXKby0sib4OCy0CbjoMJx7SrkwZdgGcLL05xaZQUFla8r96o4Qee9w7oL6LOyPMlbs7F9W0iLLo-hii2LXJe7px3qmioZjeftrm995TikDMDLjIlz5ogRtIciB6W6lqS8gqjNjr-raanrQy4PO4JxPh8Ygf22CUAoBrWddWvUAjQOClNTnIp7Vj57bqaAZ2VA"; // Remplace par un token valide ou gestion OAuth
+
+        const res = await fetch("https://az96kjgo55.execute-api.eu-west-3.amazonaws.com/prod/extract-user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${spotifyToken}`, // token dans header, ok ici
+          },
+          body: JSON.stringify({ session_id: sessionId }),
+        });
+
+        const data = await res.json();
+        console.log("Tracks extraits:", data);
+        setTracks(data.recent_tracks_preview || []);
+      } catch (error) {
+        console.error("Erreur récupération tracks:", error);
+      }
+    }
+
+    fetchRecentTracks();
+  }, [sessionId]);
+
+  // Fonction pour chercher les artistes
+  async function searchArtists() {
+    if (!searchQuery) return;
+    try {
+      const res = await fetch("https://az96kjgo55.execute-api.eu-west-3.amazonaws.com/prod/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: searchQuery }),
+      });
+      const data = await res.json();
+      setSearchResults(data.artists || []);
+      console.log("Résultats recherche:", data);
+    } catch (error) {
+      console.error("Erreur recherche:", error);
+    }
+  }
+
+  // Fonction pour appeler extract-simulated avec les artistes sélectionnés
+  async function extractSimulated() {
+    if (searchResults.length === 0) {
+      alert("Aucun artiste sélectionné pour extraction simulée.");
+      return;
+    }
+
+    // Préparer le body avec les champs attendus
+    const artistsPayload = searchResults.map(artist => ({
+      id: artist.id,
+      name: artist.name,
+      genres: artist.genres || [],
+    }));
+
+    try {
+      const res = await fetch("https://az96kjgo55.execute-api.eu-west-3.amazonaws.com/prod/extract-simulated", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, artists: artistsPayload }),
+      });
+      const data = await res.json();
+      console.log("Extraction simulée réussie:", data);
+      alert("Extraction simulée lancée !");
+    } catch (error) {
+      console.error("Erreur extraction simulée:", error);
+      alert("Erreur lors de l'extraction simulée.");
+    }
+  }
+
+  return (
+    <div>
+      <h1>Bienvenue sur Spotify Listening Intelligence</h1>
+      {sessionId ? (
+        <>
+          <h2>Session créée : {sessionId}</h2>
+          <h3>50 derniers morceaux extraits :</h3>
+          <ul>
+            {tracks.map((track, idx) => (
+              <li key={idx}>
+                {track.track.name} — {track.track.artists[0].name}
+              </li>
+            ))}
+          </ul>
+
+          <hr />
+
+          <div>
+            <h3>Recherche artiste</h3>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Tape un nom d'artiste"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <button onClick={searchArtists}>Rechercher</button>
+
+            <ul>
+              {searchResults.map(artist => (
+                <li key={artist.id}>
+                  {artist.name} — Genres: {artist.genres?.join(", ") || "N/A"}
+                </li>
+              ))}
+            </ul>
+
+            <button onClick={extractSimulated} disabled={searchResults.length === 0}>
+              Extract Simulated
+            </button>
+          </div>
+        </>
+      ) : (
+        <h2>Création de session en cours...</h2>
+      )}
     </div>
   );
 }
