@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -149,5 +150,7 @@ export default function Home() {
         <h2>Création de session en cours...</h2>
       )}
     </div>
+
+
   );
 }
