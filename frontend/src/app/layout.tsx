@@ -6,14 +6,18 @@ export const metadata: Metadata = {
   description: "Analyse musicale avec profil émotionnel",
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
+       
+
     <html lang="fr">
       <body>
+
         {children}
       </body>
     </html>

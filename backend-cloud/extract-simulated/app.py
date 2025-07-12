@@ -11,16 +11,17 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     try:
         body = json.loads(event.get("body", "{}"))
-        session_id = event.get("headers", {}).get("x-session-id")
+        session_id = body.get("session_id")
         artists = body.get("artists", [])
 
         if not session_id:
             return {"statusCode": 400, "body": json.dumps({"error": "Missing session_id."})}
 
+        logger.info(f"Session ID reçu depuis le body : {session_id}")
+
         if not isinstance(artists, list) or len(artists) < 1:
             return {"statusCode": 400, "body": json.dumps({"error": "Au moins 1 artiste est requis."})}
 
-        logger.info(f"Session ID reçu : {session_id}")
         logger.info("Creating Spotify client...")
         sp = get_spotify_client_credentials()
         tracks = []
@@ -56,9 +57,9 @@ def lambda_handler(event, context):
         logger.info(f"Returning {len(tracks)} total tracks for session: {session_id}")
 
         from utils.file_utils import upload_json_to_s3
-        bucket_name = os.environ.get("S3_BUCKET_NAME")
+        bucket_name = os.environ.get("BUCKET_NAME")
         if not bucket_name:
-            raise Exception("Variable d'environnement S3_BUCKET_NAME non définie.")
+            raise Exception("Variable d'environnement BUCKET_NAME non définie.")
 
         s3_key = f"data/{session_id}/top_tracks.json"
         upload_json_to_s3({

@@ -3,11 +3,10 @@ import os
 from utils.auth import get_spotify_client_from_token
 from utils.file_utils import upload_json_to_s3
 
-BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+BUCKET_NAME = os.getenv("BUCKET_NAME")
 SCOPE = "user-read-recently-played user-read-private"
 
 def get_recent_tracks(sp, limit=50):
-
     results = sp.current_user_recently_played(limit=limit)
     return results.get("items", [])
 
@@ -18,16 +17,27 @@ def lambda_handler(event, context):
         token = None
         headers = event.get("headers", {}) or {}
 
+        # Récupération du token depuis header Authorization
         auth_header = headers.get("Authorization") or headers.get("authorization")
         if auth_header and auth_header.lower().startswith("bearer "):
             token = auth_header[7:].strip()
 
+        # Si pas dans header, essayer dans cookie
         if not token:
             cookies = headers.get("Cookie") or headers.get("cookie") or ""
             for cookie in cookies.split(";"):
                 if "spotify_token" in cookie:
                     token = cookie.split("=")[1].strip()
                     break
+
+        # Si pas dans cookie, essayer dans body
+        if not token:
+            body_str = event.get("body", "{}")
+            try:
+                body = json.loads(body_str)
+                token = body.get("spotify_token")
+            except Exception as e:
+                print(f"Error parsing JSON body for token: {e}")
 
         if not token:
             raise Exception("Missing Spotify token in request.")
@@ -36,9 +46,16 @@ def lambda_handler(event, context):
         sp = get_spotify_client_from_token(token)
         print("Spotify client initialized")
 
-        session_id = headers.get("x-session-id")
+        # Récupérer le body JSON et parser pour extraire session_id
+        body_str = event.get("body", "{}")
+        try:
+            body = json.loads(body_str)
+        except Exception as e:
+            raise Exception(f"Invalid JSON body: {e}")
+
+        session_id = body.get("session_id")
         if not session_id:
-            raise Exception("Missing 'x-session-id' header.")
+            raise Exception("Missing 'session_id' in request body.")
         print(f"Session ID received: {session_id}")
 
         tracks = get_recent_tracks(sp, limit=50)

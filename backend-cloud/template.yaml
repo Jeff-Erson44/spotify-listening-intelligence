@@ -1,0 +1,262 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Spotify Listening - Lambda Create Session & Extract User avec ECR Images et HTTP API Gateway
+
+Globals:
+  Function:
+    Timeout: 10
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: Bucket S3 existant pour assets
+    Default: spotify-listening-intelligence-522814719052
+
+Resources:
+
+  # ====== Fonctions Lambda ======
+  CreateSessionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CreateSessionFunction
+      PackageType: Image
+      ImageUri: 522814719052.dkr.ecr.eu-west-3.amazonaws.com/create-session-lambda:latest
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+
+  ExtractUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ExtractUserFunction
+      PackageType: Image
+      ImageUri: 522814719052.dkr.ecr.eu-west-3.amazonaws.com/extract-user-lambda:latest
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+          SPOTIPY_CLIENT_ID: 2ceb15aa0a854450b84b14d54f02df5a
+          SPOTIPY_CLIENT_SECRET: a0e8ebc4c3964f7894036b8e10e4818c
+          SPOTIPY_REDIRECT_URI: https://oauth.pstmn.io/v1/callback
+
+  TransformFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: TransformFunction
+      PackageType: Image
+      ImageUri: 522814719052.dkr.ecr.eu-west-3.amazonaws.com/transform-lambda:latest
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+
+  ProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ProfileFunction
+      PackageType: Image
+      ImageUri: 522814719052.dkr.ecr.eu-west-3.amazonaws.com/profile-lambda:latest
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+
+  ExtractSimulatedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ExtractSimulatedFunction
+      PackageType: Image
+      ImageUri: 522814719052.dkr.ecr.eu-west-3.amazonaws.com/extract-simulated-lambda:latest
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+          SPOTIPY_CLIENT_ID: 2ceb15aa0a854450b84b14d54f02df5a
+          SPOTIPY_CLIENT_SECRET: a0e8ebc4c3964f7894036b8e10e4818c
+          SPOTIPY_REDIRECT_URI: https://oauth.pstmn.io/v1/callback
+
+  SearchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SearchFunction
+      PackageType: Image
+      ImageUri: 522814719052.dkr.ecr.eu-west-3.amazonaws.com/search-lambda:latest
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+          SPOTIPY_CLIENT_ID: 2ceb15aa0a854450b84b14d54f02df5a
+          SPOTIPY_CLIENT_SECRET: a0e8ebc4c3964f7894036b8e10e4818c
+          SPOTIPY_REDIRECT_URI: https://oauth.pstmn.io/v1/callback
+
+  # ====== API Gateway HTTP ======
+  SpotifyListeningAPI:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Name: SpotifyListeningAPI
+      CorsConfiguration:
+        AllowOrigins:
+          - "http://localhost:3000"
+          - "https://tonfrontend.vercel.app"
+        AllowHeaders:
+          - Authorization
+          - Content-Type
+          - Cookie
+          - X-Session-Id
+        AllowMethods:
+          - POST
+          - OPTIONS
+        AllowCredentials: true
+
+  # ====== Intégrations API Gateway ======
+  CreateSessionApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt CreateSessionFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  ExtractUserApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt ExtractUserFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  TransformApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt TransformFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  ProfileApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt ProfileFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  SearchApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt SearchFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  ExtractSimulatedApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt ExtractSimulatedFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  # ====== Routes API Gateway ======
+  CreateSessionApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      RouteKey: "POST /create-session"
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${CreateSessionApiIntegration}"
+
+  ExtractUserApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      RouteKey: "POST /extract-user"
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${ExtractUserApiIntegration}"
+
+  TransformApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      RouteKey: "POST /transform"
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${TransformApiIntegration}"
+
+  ProfileApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      RouteKey: "POST /profile"
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${ProfileApiIntegration}"
+
+  SearchApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      RouteKey: "POST /search"
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${SearchApiIntegration}"
+
+  ExtractSimulatedApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      RouteKey: "POST /extract-simulated"
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${ExtractSimulatedApiIntegration}"
+
+  # ====== Stage API Gateway ======
+  ApiStageProd:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      AutoDeploy: true
+      StageName: prod
+
+  # ====== Rôle IAM pour Lambda ======
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: SpotifyListeningLambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ECRReadAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Resource: '*'
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${BucketName}
+                  - !Sub arn:aws:s3:::${BucketName}/*
+
+Outputs:
+  ApiUrl:
+    Description: "HTTP API endpoint URL"
+    Value: !Sub "https://${SpotifyListeningAPI}.execute-api.${AWS::Region}.amazonaws.com/prod"
