@@ -1,75 +1,19 @@
 "use client"
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { extractUser } from "@/lib/api/extract-user";
 import { useSession } from "@/hook/useSession";
+import { useSpotifyAuth } from "@/hook/useSpotifyAuth";
 import { useRouter } from "next/navigation";
 
-const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!;
-const CLIENT_SECRET = process.env.NEXT_PUBLIC_SPOTIFY_SECRET!;
-const REDIRECT_URI = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI!;
 
 export default function SpotifyPage() {
   const router = useRouter();
   const sessionId = useSession();
-  const [oauthCode, setOauthCode] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [loadingToken, setLoadingToken] = useState(false);
+  const { accessToken, loadingToken, error: authError, fetchAccessToken } = useSpotifyAuth();
   const [loadingExtract, setLoadingExtract] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
 
-  // Récupérer le code OAuth dans localStorage
-  useEffect(() => {
-    const code = localStorage.getItem("spotify_oauth_code");
-    setOauthCode(code);
-  }, []);
-
-  // Auto call fetchAccessToken dès que oauthCode est défini
-  useEffect(() => {
-    if (oauthCode && !accessToken && !loadingToken) {
-      fetchAccessToken();
-    }
-  }, [oauthCode]);
-
-  // suppression du useEffect auto extractUser
-
-  // Échange code OAuth contre token
-  const fetchAccessToken = useCallback(async () => {
-    if (!oauthCode) return;
-    setLoadingToken(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      params.append("grant_type", "authorization_code");
-      params.append("code", oauthCode);
-      params.append("redirect_uri", REDIRECT_URI);
-
-      const basicAuth = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
-
-      const res = await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${basicAuth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: params.toString(),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error_description || "Erreur token Spotify");
-      }
-      const data = await res.json();
-      setAccessToken(data.access_token);
-      localStorage.setItem("spotify_access_token", data.access_token);
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la récupération du token");
-    } finally {
-      setLoadingToken(false);
-    }
-  }, [oauthCode]);
-
-  // Appel lambda extractUser
   const handleExtractUser = useCallback(async () => {
     if (!accessToken || !sessionId) {
       setError("Token Spotify ou sessionId manquant");
@@ -93,10 +37,14 @@ export default function SpotifyPage() {
     <main style={{ padding: "2rem" }}>
       <h1>Page Spotify</h1>
 
-      {!accessToken && oauthCode && (
+      {!accessToken && (
         <button onClick={fetchAccessToken} disabled={loadingToken}>
           {loadingToken ? "Récupération du token..." : "Obtenir Access Token"}
         </button>
+      )}
+
+      {authError && (
+        <p style={{ color: "red", marginTop: "1rem" }}>Erreur Auth : {authError}</p>
       )}
 
       {accessToken && (
@@ -156,7 +104,9 @@ export default function SpotifyPage() {
         </>
       )}
 
-      {!oauthCode && <p>Veuillez d'abord vous connecter via Spotify pour obtenir un code OAuth.</p>}
+      {!accessToken && !loadingToken && (
+        <p>Veuillez d'abord vous connecter via Spotify pour obtenir un code OAuth.</p>
+      )}
     </main>
   );
 }

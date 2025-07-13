@@ -90,6 +90,17 @@ Resources:
           SPOTIPY_CLIENT_SECRET: a0e8ebc4c3964f7894036b8e10e4818c
           SPOTIPY_REDIRECT_URI: https://oauth.pstmn.io/v1/callback
 
+  GetUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetUserFunction
+      PackageType: Image
+      ImageUri: 522814719052.dkr.ecr.eu-west-3.amazonaws.com/get-user-lambda:latest
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+
   # ====== API Gateway HTTP ======
   SpotifyListeningAPI:
     Type: AWS::Serverless::HttpApi
@@ -150,6 +161,14 @@ Resources:
       IntegrationUri: !GetAtt SearchFunction.Arn
       PayloadFormatVersion: '2.0'
 
+  GetUserApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt GetUserFunction.Arn
+      PayloadFormatVersion: '2.0'
+
   ExtractSimulatedApiIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -198,6 +217,14 @@ Resources:
       RouteKey: "POST /search"
       AuthorizationType: NONE
       Target: !Sub "integrations/${SearchApiIntegration}"
+
+  GetUserApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SpotifyListeningAPI
+      RouteKey: "GET /get-user"
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${GetUserApiIntegration}"
 
   ExtractSimulatedApiRoute:
     Type: AWS::ApiGatewayV2::Route

@@ -11,13 +11,13 @@ export type ProfileData = {
   energie_moyenne: number;
 };
 
-export async function fetchProfileData(sessionId: string): Promise<ProfileData> {
+export async function fetchUserProfile(sessionId: string): Promise<ProfileData> {
   if (!sessionId) {
     throw new Error("Session ID not found in localStorage");
   }
 
   console.log("Sending session_id in body:", sessionId);
-  const response = await fetch(`${API_BASE_URL}profile`, {
+  const response = await fetch(`${API_BASE_URL}get-user`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ session_id: sessionId }),
