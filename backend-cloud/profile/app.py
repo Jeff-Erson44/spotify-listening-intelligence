@@ -37,16 +37,16 @@ def generate_emotion_description(emotions):
     return templates[hash(e1 + e2 + e3) % len(templates)]
 
 s3 = boto3.client("s3")
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
+BUCKET_NAME = os.getenv("BUCKET_NAME", "")
 
 def lambda_handler(event, context):
     print("Lambda generate_profile démarrée.")
     print("Événement S3 reçu pour analyse.")
 
-    if not S3_BUCKET_NAME:  
+    if not BUCKET_NAME:  
         return {
             "statusCode": 500,
-            "body": json.dumps({"error": "S3_BUCKET_NAME environment variable is not set."})
+            "body": json.dumps({"error": "BUCKET_NAME environment variable is not set."})
         }
 
     try:
@@ -62,7 +62,7 @@ def lambda_handler(event, context):
     
     try:
         print("Récupération du fichier enriched_tracks.json depuis S3...")
-        response = s3.get_object(Bucket=S3_BUCKET_NAME, Key=key)
+        response = s3.get_object(Bucket=BUCKET_NAME, Key=key)
         print("Fichier enriched_tracks.json récupéré avec succès.")
         data = json.loads(response['Body'].read().decode('utf-8'))
     except ClientError as e:
@@ -119,7 +119,7 @@ def lambda_handler(event, context):
 
         print("Enregistrement du profil utilisateur dans S3...")
         s3.put_object(
-            Bucket=S3_BUCKET_NAME,
+            Bucket=BUCKET_NAME,
             Key=f"data/{session_id}/profile.json",
             Body=json.dumps(profile_data),
             ContentType="application/json"

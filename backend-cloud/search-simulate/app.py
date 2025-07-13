@@ -1,4 +1,3 @@
-# Ce fichier définit le point d'entrée Lambda pour la recherche d'artistes Spotify via une requête HTTP.
 import logging
 import json
 from utils.auth import get_spotify_client_credentials
@@ -10,11 +9,6 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event.get("body", "{}"))
         query = body.get("query")
-        headers = {k.lower(): v for k, v in event.get("headers", {}).items()}
-        session_id = headers.get("x-session-id")
-        if not session_id:
-            logger.warning("Header 'x-session-id' absent des en-têtes de la requête.")
-            return {"statusCode": 400, "body": json.dumps({"error": "Header 'x-session-id' manquant."})}
         if not query:
             return {"statusCode": 400, "body": json.dumps({"error": "Paramètre 'query' requis."})}
 
@@ -39,12 +33,11 @@ def lambda_handler(event, context):
                 logger.warning(f"Artiste ignoré (erreur lors du parsing) : {e}")
                 continue
 
-        logger.info(f"{len(artists)} artistes trouvés pour la session {session_id}.")
+        logger.info(f"{len(artists)} artistes trouvés.")
 
         return {
             "statusCode": 200,
             "body": json.dumps({
-                "session_id": session_id,
                 "artists": artists
             })
         }

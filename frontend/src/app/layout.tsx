@@ -7,15 +7,23 @@ export const metadata: Metadata = {
   description: "Analyse musicale avec profil émotionnel",
 };
 
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
+       
+
     <html lang="fr">
       <body>
+
         <ClientLayout>{children}</ClientLayout>
+
+
+        {children}
+
       </body>
     </html>
   );
