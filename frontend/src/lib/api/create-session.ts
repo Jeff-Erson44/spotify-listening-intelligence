@@ -1,19 +1,27 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export async function createSession() {
+export interface CreateSessionResponse {
+  sessionId: string;
+  createdAt: string;
+}
+
+export async function createSession(): Promise<CreateSessionResponse> {
   try {
-    const res = await fetch(`${BASE_URL}/create-session-lambda`, {
-      method: "POST",
-      credentials: "include",
+    const response = await fetch(`${API_BASE_URL}create-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
     });
-    if (!res.ok) {
-      console.error("Erreur lors de la création de session:", res.statusText);
-      return { sessionId: null };
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const sessionId = res.headers.get("x-session-id");
-    return { sessionId: sessionId ?? null };
+    const data = (await response.json()) as CreateSessionResponse;
+    return data;
   } catch (error) {
-    console.error("Erreur réseau:", error);
-    return { sessionId: null };
+    console.error('Error creating session:', error);
+    throw error;
   }
 }

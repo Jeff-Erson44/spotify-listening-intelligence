@@ -1,24 +1,21 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export async function extractUser(sessionId: string) {
+export async function extractUser(sessionId: string, token: string) {
   try {
-    const res = await fetch(`${BASE_URL}/extract-user-lambda`, {
-      method: "POST",
+    const response = await fetch(`${API_BASE_URL}extract-user`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "x-session-id": sessionId,
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
+      body: JSON.stringify({ session_id: sessionId }),
     });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Erreur HTTP:", res.status, errorText);
-      throw new Error(`Échec de l'extraction: ${res.status} - ${errorText}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    return res.json();
+    return await response.json();
   } catch (error) {
-    console.error("Erreur réseau ou fetch:", error);
-    throw new Error("Impossible d'appeler la fonction extract-user.");
+    console.error('Error in extractUser:', error);
+    throw error;
   }
 }
