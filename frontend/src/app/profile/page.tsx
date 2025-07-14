@@ -7,16 +7,36 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const sessionId = localStorage.getItem('sessionId');
-    console.log("Session ID from localStorage:", sessionId);
-    if (!sessionId) {
-      setError("Session ID not found in localStorage");
-      return;
-    }
+    let attempts = 0;
+    const maxAttempts = 5;
+    const delay = 1500; 
 
-    fetchUserProfile(sessionId)
-      .then(setData)
-      .catch((e) => setError(e.message));
+    const fetchData = () => {
+      setError(null);
+      const sessionId = localStorage.getItem('sessionId');
+      console.log("Session ID from localStorage:", sessionId);
+      if (!sessionId) {
+        setError("Session ID not found in localStorage");
+        return;
+      }
+
+      fetchUserProfile(sessionId)
+        .then(setData)
+        .catch((e) => {
+          if (attempts < maxAttempts && e.message.includes("404")) {
+            attempts++;
+            setTimeout(fetchData, delay);
+          } else {
+            setError(e.message);
+          }
+        });
+    };
+
+    fetchData();
+
+    return () => {
+      attempts = maxAttempts + 1; 
+    };
   }, []);
 
   if (error) {
@@ -24,7 +44,7 @@ export default function ProfilePage() {
   }
 
   if (!data) {
-    return <div>Chargement...</div>;
+    return <div>Chargement des données, veuillez patienter...</div>;
   }
 
   return (
