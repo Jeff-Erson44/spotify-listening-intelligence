@@ -16,7 +16,7 @@ export default function Home() {
             const { sessionId } = await createSession();
             console.log("New Spotify sessionId:", sessionId);
             localStorage.setItem('sessionId', sessionId);
-            router.push('/spotify');
+            router.push('/spotify/login');
           }}
           style={{ marginRight: 10 }}
         >

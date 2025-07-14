@@ -8,11 +8,36 @@ import { useRouter } from "next/navigation";
 
 export default function SpotifyPage() {
   const router = useRouter();
-  const sessionId = useSession();
   const { accessToken, loadingToken, error: authError, fetchAccessToken } = useSpotifyAuth();
+
+  useEffect(() => {
+    if (!accessToken && !loadingToken) {
+      const timer = setTimeout(() => {
+        router.push("/spotify/login");
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [accessToken, loadingToken, router]);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
+
+    if (code) {
+      console.log("Code OAuth récupéré depuis l’URL :", code);
+      localStorage.setItem("spotify_oauth_code", code);
+    }
+  }, []);
+  const sessionId = useSession();
   const [loadingExtract, setLoadingExtract] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
+
+  useEffect(() => {
+    console.log("SessionID:", sessionId);
+    console.log("AccessToken:", accessToken);
+  }, [sessionId, accessToken]);
 
   const handleExtractUser = useCallback(async () => {
     if (!accessToken || !sessionId) {
@@ -47,20 +72,29 @@ export default function SpotifyPage() {
         <p style={{ color: "red", marginTop: "1rem" }}>Erreur Auth : {authError}</p>
       )}
 
+      {authError?.includes("Authorization code expired") && (
+        <div style={{ marginTop: "1rem", color: "red" }}>
+          <p>Votre code Spotify a expiré. Veuillez recommencer la connexion.</p>
+          <button onClick={() => router.push("/")}>Retour à l’accueil</button>
+        </div>
+      )}
+
       {accessToken && (
         <>
           <section>
-            <h2>Access Token Spotify</h2>
-            <pre
-              style={{
-                backgroundColor: "#f0f0f0",
-                padding: "1rem",
-                borderRadius: "4px",
-                wordBreak: "break-all",
-              }}
-            >
-              {accessToken}
-            </pre>
+            <details style={{ marginTop: "1rem" }}>
+              <summary>Voir Access Token</summary>
+              <pre
+                style={{
+                  backgroundColor: "#f0f0f0",
+                  padding: "1rem",
+                  borderRadius: "4px",
+                  wordBreak: "break-all",
+                }}
+              >
+                {accessToken}
+              </pre>
+            </details>
           </section>
 
           <section style={{ marginTop: "1rem" }}>
