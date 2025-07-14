@@ -1,27 +1,40 @@
 'use client';
-
-import Link from 'next/link';
-import { useSession } from '@/hook/useSession';
+import { useRouter } from 'next/navigation';
+import { createSession } from '@/lib/api/create-session';
+import { useSessionContext } from '@/context/SessionContext';
 
 export default function Home() {
-  const sessionId = useSession();
+  const { sessionId } = useSessionContext();
+  const router = useRouter();
 
   return (
     <main>
-      <h1>Session ID :</h1>
-      <p>{sessionId ?? 'Aucune session disponible'}</p>
-
       <div style={{ marginTop: 20 }}>
-        <Link href="/spotify/login">
-          <button style={{ marginRight: 10 }}>Connexion Spotify (compte)</button>
-        </Link>
+        <button
+          onClick={async () => {
+            localStorage.removeItem('sessionId');
+            const { sessionId } = await createSession();
+            console.log("New Spotify sessionId:", sessionId);
+            localStorage.setItem('sessionId', sessionId);
+            router.push('/spotify');
+          }}
+          style={{ marginRight: 10 }}
+        >
+          Connexion Spotify (compte)
+        </button>
 
-        <Link href="/simulate">
-          <button>Version Simulée (sans compte)</button>
-        </Link>
+        <button
+          onClick={async () => {
+            localStorage.removeItem('sessionId');
+            const { sessionId } = await createSession();
+            console.log("New Simulated sessionId:", sessionId);
+            localStorage.setItem('sessionId', sessionId);
+            router.push('/simulate');
+          }}
+        >
+          Version Simulée (sans compte)
+        </button>
       </div>
     </main>
-
-
   );
 }

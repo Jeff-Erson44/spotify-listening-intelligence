@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";  // <- ajout
+import { useRouter } from "next/navigation";
 import { searchArtists } from "@/lib/api/search";
 import { extractSimulated } from "@/lib/api/extract-simulate";
 
@@ -16,7 +16,7 @@ export default function SimulatePage() {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Artist[]>([]);
   const [selectedArtists, setSelectedArtists] = useState<Artist[]>([]);
-  const router = useRouter(); // <- ajout
+  const router = useRouter(); 
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedArtists");
@@ -110,13 +110,15 @@ export default function SimulatePage() {
         onClick={async () => {
           try {
             const sessionId = localStorage.getItem("sessionId");
-            console.log("Session ID from localStorage:", sessionId);
-            if (!sessionId) {
-              return;
-            }
+            if (!sessionId) return;
+
             const result = await extractSimulated(selectedArtists, sessionId);
             console.log("Extract simulated result:", result);
-            router.push("/profile"); 
+
+            localStorage.removeItem("selectedArtists");
+            setSelectedArtists([]);
+
+            router.push("/profile");
           } catch (error) {
             console.error("Erreur extraction simulée", error);
           }
