@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
-import { fetchProfileData, ProfileData } from "@/lib/api/profile";
+import { fetchUserProfile, ProfileData } from "@/lib/api/profile";
 
 export default function ProfilePage() {
   const [data, setData] = useState<ProfileData | null>(null);
@@ -8,12 +8,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const sessionId = localStorage.getItem('sessionId');
+    console.log("Session ID from localStorage:", sessionId);
     if (!sessionId) {
       setError("Session ID not found in localStorage");
       return;
     }
 
-    fetchProfileData(sessionId)
+    fetchUserProfile(sessionId)
       .then(setData)
       .catch((e) => setError(e.message));
   }, []);
