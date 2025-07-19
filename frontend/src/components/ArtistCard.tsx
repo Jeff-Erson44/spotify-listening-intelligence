@@ -1,13 +1,16 @@
 import Image from "next/image"
 
-export default function ArtistCard() {
+interface ArtistCardProps {
+    src: string;
+}
+export default function ArtistCard({src}: ArtistCardProps) {
     return (
-            <Image 
-                src="/images/rihanna.png"
-                height={300}
-                width={300}
-                alt="card artiste rihanna"
-                className="rounded-lg border-[5px] border-black"
+        <Image 
+            src={src}
+            height={300}
+            width={300}
+            alt="card artiste rihanna"
+            className="object-cover rounded-lg border-[5px] border-[#E0E0E080]"
         />
     )
 }

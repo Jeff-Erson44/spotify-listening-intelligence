@@ -32,3 +32,10 @@
 body {
   font-family: "SFPro", -apple-system, BlinkMacSystemFont, sans-serif;
 } 
+
+
+@layer components {
+  .app-grid {
+    @apply grid grid-cols-16 gap-[24px] px-[64px]
+  }
+}
