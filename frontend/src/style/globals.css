@@ -15,12 +15,18 @@
   font-weight: 500;
   font-style: normal;
 }
+.sfpro-medium {
+  font-family: "SFPro-Medium", sans-serif;
+}
 
 @font-face {
   font-family: "SFPro-Light";
   src: url("/fonts/SF-Pro-Display-Light.otf") format("opentype");
   font-weight: 300;
   font-style: normal;
+}
+.sfpro-light {
+  font-family: "SFPro-Light", sans-serif;
 }
 
 body {
