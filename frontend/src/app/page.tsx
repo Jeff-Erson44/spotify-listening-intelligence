@@ -1,6 +1,8 @@
 'use client';
 import ArtistCard from "@/components/ArtistCard";
 import Button from "@/components/Button";
+import ProfilCardEmotion from "@/components/ProfilCardEmotion";
+import ProfilCardMain from "@/components/ProfilCardMain/ProfilCardMain";
 
 export default function Home() {
   return (
@@ -33,6 +35,9 @@ export default function Home() {
         />
       </div>
       
+
+      <ProfilCardMain />
+      <ProfilCardEmotion />
       
 
       <div className="app-grid">
