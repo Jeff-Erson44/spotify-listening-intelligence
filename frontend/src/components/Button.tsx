@@ -19,7 +19,7 @@ export default function Button({ text, mode, variant ="primary" }: ButtonProps) 
     router.push(mode === "spotify" ? "/spotify/login" : "/simulate");
   };
 
-  const baseClasses = "w-[240px] px-6 py-4 rounded border border-black font-semibold transition duration-300";
+  const baseClasses = " w-[160px] text-xs rounded border border-black font-semibold transition duration-300 sm:w-[240px] sm:px-6 py-4";
   const variantClasses =
     variant === "primary"
       ? "bg-black text-white hover:bg-gray-800"

@@ -1,0 +1,39 @@
+.containerHeader{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    &__artistCard{
+        flex-grow: 1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 0;
+        margin-top: 0px;
+        overflow: hidden;
+        > :nth-child(1){
+            transform: rotate(-15deg) translateX(50px) translateY(70px);
+        }
+        > :nth-child(2){
+            transform: translateY(10px);
+            z-index: 2;
+        }
+        > :nth-child(3){
+            transform: rotate(15deg) translateX(-50px) translateY(70px);
+        }
+         @media screen and (max-width:640px){
+            align-items: center;
+            > :nth-child(1),
+            > :nth-child(2),
+            > :nth-child(3){
+                transform: rotate(0) translate(0);
+            }
+            > :nth-child(2){
+                width: 250px!important;
+                height: 250px;
+            }
+        }
+    }
+   
+}
