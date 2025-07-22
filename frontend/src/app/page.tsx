@@ -1,8 +1,9 @@
 'use client';
 import ArtistCard from "@/components/ArtistCard";
+import ArtistSearchInput from "@/components/ArtistSearchInput/ArtistSearchInput";
+import ArtistSearchSelect from "@/components/ArtistSearchSelect";
 import Button from "@/components/Button";
-import ProfilCardEmotion from "@/components/ProfilCardEmotion";
-import ProfilCardMain from "@/components/ProfilCardMain/ProfilCardMain";
+
 
 export default function Home() {
   return (
@@ -36,10 +37,14 @@ export default function Home() {
       </div>
       
 
-      <ProfilCardMain />
-      <ProfilCardEmotion />
-      
+      <ArtistSearchInput query={""} onChange={function (value: string): void {
+        throw new Error("Function not implemented.");
+      } } onKeyDown={function (e: React.KeyboardEvent<HTMLInputElement>): void {
+        throw new Error("Function not implemented.");
+      } } />
 
+      <ArtistSearchSelect />
+      
       <div className="app-grid">
         <div className="col-span-4 bg-red-100">Colonne 1 à 4</div>
         <div className="col-span-8 bg-green-100">Colonne 5 à 12</div>

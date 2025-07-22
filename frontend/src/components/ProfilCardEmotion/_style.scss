@@ -1,0 +1,19 @@
+.container_profilCardEmotion{
+    border-radius: 1rem;
+    padding: 1rem;
+    min-height: 175px;
+    box-shadow: 101px 240px 73px 0px rgba(112, 121, 210, 0.01), 64px 154px 67px 0px rgba(112, 121, 210, 0.04), 36px 87px 56px 0px rgba(112, 121, 210, 0.15), 16px 38px 42px 0px rgba(112, 121, 210, 0.26), 4px 10px 23px 0px rgba(112, 121, 210, 0.29);
+    &--list{
+        display: flex;
+        justify-content: space-between;
+        &__emotion{
+            display: flex;
+            width: 130px;
+            justify-content: space-between;
+            span{
+                border-radius: 12px;
+                background: orange;
+            }
+        }
+    }
+}

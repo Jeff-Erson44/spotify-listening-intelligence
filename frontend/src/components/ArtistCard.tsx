@@ -10,7 +10,7 @@ export default function ArtistCard({src}: ArtistCardProps) {
             height={300}
             width={300}
             alt="card artiste rihanna"
-            className="object-cover rounded-lg border-[5px] border-[#E0E0E080]"
+            className="object-cover rounded-lg border-[5px] border-[#E0E0E080]max-w-[300px] max-h-[300px]"
         />
     )
 }
