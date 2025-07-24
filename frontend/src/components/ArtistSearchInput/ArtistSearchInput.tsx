@@ -1,15 +1,14 @@
 'use client';
 
 import Image from "next/image";
-import './_style.scss'
+import './_style.scss';
 
 interface Props {
-  query: string;
-  onChange: (value: string) => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function ArtistSearchInput({ query, onChange, onKeyDown }: Props) {
+export default function ArtistSearchInput({ value, onChange }: Props) {
   return (
     <div className="container__artistSearchInput">
       <Image 
@@ -17,14 +16,14 @@ export default function ArtistSearchInput({ query, onChange, onKeyDown }: Props)
         alt=""
         width={24}
         height={24}
+        priority
       />
       <input
         type="text"
         placeholder="Michael Jackson"
-        value={query}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={onKeyDown}
-        className=""
+        value={value}
+        onChange={onChange}
+        className="ml-2 flex-1 bg-transparent placeholder-gray-400 focus:outline-none text-sm"
       />
     </div>
   );

@@ -10,7 +10,7 @@ export default function ArtistCard({src}: ArtistCardProps) {
             height={320}
             width={320}
             alt="image d'un artiste pour illustrer le concept"
-            className="object-cover rounded-lg border-[5px] border-[#E0E0E080] max-w-[200px] max-h-[200px] sm:max-w-[320px] sm:max-h-[320px]"
+            className="object-cover rounded-lg border-[5px] border-[#E0E0E080] max-w-[300px] max-h-[300px] sm:max-w-[320px] sm:max-h-[320px]"
         />
     )
 }

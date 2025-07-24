@@ -3,129 +3,143 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { searchArtists } from "@/lib/api/search";
-import { extractSimulated } from "@/lib/api/extract-simulate";
+import ArtistSearchInput from "@/components/ArtistSearchInput/ArtistSearchInput";
+import ArtistSearchSelect from "@/components/ArtistSearchSelect";
 
 interface Artist {
   id: string;
   name: string;
   genres: string[];
-  images?: { url: string }[];
+  image?: { url: string }[];
 }
 
 export default function SimulatePage() {
+  const router = useRouter();
+
+  const [results, setResults] = useState<Artist[]>([]);
   const [query, setQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Artist[]>([]);
   const [selectedArtists, setSelectedArtists] = useState<Artist[]>([]);
-  const router = useRouter(); 
 
   useEffect(() => {
-    const stored = localStorage.getItem("selectedArtists");
-    if (stored) {
-      setSelectedArtists(JSON.parse(stored));
-    }
+    const stored = JSON.parse(localStorage.getItem("selectedArtists") || "[]");
+    setSelectedArtists(stored);
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("selectedArtists", JSON.stringify(selectedArtists));
-  }, [selectedArtists]);
-
-  async function handleSearch() {
-    if (!query.trim()) return;
+  const handleSearch = async (value: string) => {
     try {
-      const results = await searchArtists(query.trim());
-      setSearchResults(results);
+      const data = await searchArtists(value);
+      console.log("Résultats de la recherche :", data);
+      setResults(data);
     } catch (error) {
-      console.error("Erreur recherche artistes", error);
+      console.error("Erreur de recherche :", error);
     }
-  }
+  };
 
-  function addArtist(artist: Artist) {
+  const handleSelect = (artist: Artist) => {
     if (selectedArtists.find((a) => a.id === artist.id)) return;
-    setSelectedArtists([...selectedArtists, artist]);
-  }
+    if (selectedArtists.length >= 10) return;
 
-  function removeArtist(id: string) {
-    setSelectedArtists(selectedArtists.filter((a) => a.id !== id));
-  }
+    const selected = {
+      id: artist.id,
+      name: artist.name,
+      genres: artist.genres,
+      image: artist.image
+    };
+
+    const stored = JSON.parse(localStorage.getItem("selectedArtists") || "[]");
+    const updated = [...stored, selected];
+    localStorage.setItem("selectedArtists", JSON.stringify(updated));
+
+    console.log("Artiste ajouté au localStorage :", selected);
+
+    setSelectedArtists((prev) => [...prev, artist]);
+    setQuery("");
+    setResults([]); 
+  };
 
   return (
-    <main style={{ padding: "1rem" }}>
-      <h1>Simulation - Recherche artistes</h1>
+    <main className="">
+      <h1 className="sm:text-5xl text-[24px] Sfpro-medium text-center mt-[100px] mb-4">Ton profil, à partir de tes artistes.</h1>
+      <h2 className="sm:text-xl text-sm text-center text-gray-666 px-[32px]">Ajoute quelques artistes que tu écoutes régulièrement. On s'occupe du reste</h2>
 
-      <input
-        type="text"
-        placeholder="Chercher un artiste"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleSearch();
-        }}
-        style={{ padding: "0.5rem", width: "300px" }}
-      />
-      <button onClick={handleSearch} style={{ marginLeft: 8 }}>
-        Rechercher
-      </button>
-
-      <section style={{ marginTop: "1rem" }}>
-        <h2>Résultats</h2>
-        {searchResults.length === 0 && <p>Aucun résultat</p>}
-        <ul>
-          {searchResults.map((artist) => (
-            <li key={artist.id} style={{ marginBottom: "0.5rem" }}>
-              <strong>{artist.name}</strong> — Genres:{" "}
-              {artist.genres.join(", ") || "N/A"}
-              <button
-                style={{ marginLeft: 8 }}
-                onClick={() => addArtist(artist)}
-              >
-                Ajouter
-              </button>
-            </li>
+      <div className="flex items-center gap-4 my-8 justify-center px-8">
+        <ArtistSearchInput
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button
+          onClick={() => handleSearch(query)}
+          className="px-6 py-4 bg-black text-white rounded-xl hover:bg-gray-800 transition"
+        >
+          Rechercher
+        </button>
+      </div>
+      <div className="sm:app-grid">
+          <div className="flex col-start-4 col-end-10 flex-column justify-center px-4 flex-col gap-2">
+            {results.map((artist) => (
+            <ArtistSearchSelect key={artist.id} artist={artist} onSelect={handleSelect} className=""/>
           ))}
-        </ul>
-      </section>
+        </div>
+      </div>
+      
 
-      <section style={{ marginTop: "2rem" }}>
-        <h2>Artistes sélectionnés</h2>
-        {selectedArtists.length === 0 && <p>Aucun artiste sélectionné</p>}
-        <ul>
+      <div className="mt-12 px-4">
+
+        <div className="flex flex-wrap justify-center gap-4">
           {selectedArtists.map((artist) => (
-            <li key={artist.id} style={{ marginBottom: "0.5rem" }}>
-              <strong>{artist.name}</strong> — Genres:{" "}
-              {artist.genres.join(", ") || "N/A"}
+            <div key={artist.id} className="flex flex-col items-center">
+              {artist.image && typeof artist.image === "string" && (
+                <img
+                  src={artist.image}
+                  alt={artist.name}
+                  width={80}
+                  height={80}
+                  className="rounded-xl object-cover w-[80px] h-[80px]"
+                />
+              )}
+              <p className="mt-2 text-sm text-center">{artist.name}</p>
               <button
-                style={{ marginLeft: 8 }}
-                onClick={() => removeArtist(artist.id)}
+                onClick={() => {
+                  const updated = selectedArtists.filter((a) => a.id !== artist.id);
+                  setSelectedArtists(updated);
+                  localStorage.setItem("selectedArtists", JSON.stringify(updated));
+                }}
+                className="mt-1 text-xs text-red-500 hover:underline"
               >
                 Supprimer
               </button>
-            </li>
+            </div>
           ))}
-        </ul>
-      </section>
+        </div>
+        <div className="text-center mt-8">
+          <button
+            disabled={selectedArtists.length < 5 || selectedArtists.length > 10}
+            className={`px-6 py-4 rounded-xl transition ${
+              selectedArtists.length >= 5 && selectedArtists.length <= 10
+                ? "bg-black text-white hover:bg-gray-800"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+            onClick={async () => {
+              try {
+                const sessionId = localStorage.getItem("sessionId");
+                if (!sessionId) return;
 
-      <button
-        disabled={selectedArtists.length < 5 || selectedArtists.length > 10}
-        style={{ marginTop: "2rem", padding: "0.5rem 1rem", fontWeight: "bold" }}
-        onClick={async () => {
-          try {
-            const sessionId = localStorage.getItem("sessionId");
-            if (!sessionId) return;
+                const { extractSimulated } = await import("@/lib/api/extract-simulate");
+                const result = await extractSimulated(selectedArtists, sessionId);
+                console.log("Extract simulated result:", result);
 
-            const result = await extractSimulated(selectedArtists, sessionId);
-            console.log("Extract simulated result:", result);
-
-            localStorage.removeItem("selectedArtists");
-            setSelectedArtists([]);
-
-            router.push("/profile");
-          } catch (error) {
-            console.error("Erreur extraction simulée", error);
-          }
-        }}
-      >
-        Générer l’extraction simulée
-      </button>
+                localStorage.removeItem("selectedArtists");
+                setSelectedArtists([]);
+                router.push("/profile");
+              } catch (error) {
+                console.error("Erreur extraction simulée", error);
+              }
+            }}
+          >
+            Générer l’extraction simulée
+          </button>
+        </div>
+      </div>
     </main>
   );
 }

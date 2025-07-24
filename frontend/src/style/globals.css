@@ -36,6 +36,6 @@ body {
 
 @layer components {
   .app-grid {
-    @apply grid grid-cols-16 gap-[24px] px-[64px]
+    @apply grid grid-cols-12 gap-[24px] px-[64px]
   }
 }
