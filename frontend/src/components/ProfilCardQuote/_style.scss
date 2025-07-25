@@ -20,5 +20,9 @@
                 16px 38px 42px rgba(112, 121, 210, 0.26),
                 4px 10px 23px rgba(112, 121, 210, 0.29);
   }
+  @media screen and (max-width: 640px){
+    height: fit-content;
+    margin-bottom: 100px;
+  }
 
 }

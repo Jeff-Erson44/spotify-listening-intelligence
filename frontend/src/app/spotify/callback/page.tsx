@@ -21,7 +21,7 @@ export default function SpotifyCallback() {
       localStorage.setItem("spotify_oauth_code", code);
       setMessage(`Code OAuth reçu et stocké. Redirection en cours...`);
       setTimeout(() => {
-        router.push("/spotify"); 
+        router.push("/spotify/login?code=" + code);
       }, 2000);
     } else {
       setMessage("Code OAuth non trouvé dans l'URL.");
@@ -30,8 +30,7 @@ export default function SpotifyCallback() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4">
-      <h1 className="text-2xl font-bold mb-6">Callback Spotify</h1>
-      <p className="break-all">{message}</p>
+      <h1 className="text-2xl font-bold mb-6">récupération de vos gout musicaux</h1>
     </div>
   );
 }

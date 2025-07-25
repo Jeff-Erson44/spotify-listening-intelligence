@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import './_style.scss'
 
 interface Props {
@@ -8,6 +9,13 @@ interface Props {
 }
 
 export default function ProfilCardMain({ topGenres, energie_moyenne, danse_moyenne, emotionColors }: Props){
+    const [sessionId, setSessionId] = useState<string | null>(null);
+
+    useEffect(() => {
+      const storedSessionId = localStorage.getItem('sessionId');
+      if (storedSessionId) setSessionId(storedSessionId);
+    }, []);
+
     return (
         <div className="container__profilCard ">
             <div
@@ -20,13 +28,13 @@ export default function ProfilCardMain({ topGenres, energie_moyenne, danse_moyen
             </div>
             <div className='container__profilCard--session'>
                 <p className='sfpro-medium'>Profil Card</p>
-                <p className='sfpro-light text-xs'>#000 044</p>
+                <p className='sfpro-light text-xs'>{sessionId ? `#${sessionId}` : ''}</p>
             </div>
             <div className='container__profilCard--blurCard'>
                 <div className='container__profilCard--blurCard__genre capitalize flex flex-col gap-2'>
-                    <p className='text-[24px] text-gray-666'>{topGenres?.[0]}</p>
-                    <p className='text-[18px] text-gray-666'>{topGenres?.[1]}</p>
-                    <p className='text-[18px] text-gray-666'>{topGenres?.[2]}</p>
+                    <p className='text-[20px] text-gray-666'>{topGenres?.[0]}</p>
+                    <p className='text-[16px] text-gray-666'>{topGenres?.[1]}</p>
+                    <p className='text-[16px] text-gray-666'>{topGenres?.[2]}</p>
                 </div>
                 <div className='container__profilCard--blurCard__features'>
                     <p className='text-[12px] text-gray-666'>Énergie moyenne : {(energie_moyenne * 100).toFixed(1)}</p>
