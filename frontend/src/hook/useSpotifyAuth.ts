@@ -19,7 +19,7 @@ export function useSpotifyAuth() {
     if (oauthCode && !accessToken && !loadingToken) {
       fetchAccessToken();
     }
-  }, [oauthCode]);
+  }, [oauthCode, accessToken, loadingToken, fetchAccessToken]);
 
   const fetchAccessToken = useCallback(async () => {
     if (!oauthCode) return;
@@ -49,8 +49,12 @@ export function useSpotifyAuth() {
       const data = await res.json();
       setAccessToken(data.access_token);
       localStorage.setItem("spotify_access_token", data.access_token);
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la récupération du token");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Erreur lors de la récupération du token");
+      } else {
+        setError("Erreur inconnue lors de la récupération du token");
+      }
     } finally {
       setLoadingToken(false);
     }
