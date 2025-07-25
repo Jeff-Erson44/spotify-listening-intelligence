@@ -74,6 +74,11 @@ export default function SimulatePage() {
           Rechercher
         </button>
       </div>
+      {selectedArtists.length < 5 ? (
+        <p className="text-[8px] text-red-500 text-center mt-1">Ajoute au moins 5 artistes pour continuer</p>
+      ) : selectedArtists.length >= 10 ? (
+        <p className="text-[8px] text-red-500 text-center mt-1">Tu ne peux pas ajouter plus de 10 artistes</p>
+      ) : null}
       <div className="sm:app-grid">
           <div className="flex col-start-4 col-end-10 flex-column justify-center px-4 flex-col gap-2">
             {results.map((artist) => (
@@ -136,7 +141,7 @@ export default function SimulatePage() {
               }
             }}
           >
-            Générer l’extraction simulée
+            Générer le profil
           </button>
         </div>
       </div>

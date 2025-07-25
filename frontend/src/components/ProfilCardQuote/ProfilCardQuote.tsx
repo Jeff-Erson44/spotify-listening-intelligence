@@ -1,9 +1,13 @@
 import './_style.scss'
 
-export default function ProfilCardQuote() {
+interface Props {
+    description: string;
+}
+
+export default function ProfilCardQuote({ description }: Props) {
     return(
-        <div className="container_profileCardQuote bg-gray-11">
-            <p>Ton paysage sonore oscille entre lumière et introspection. On sent une énergie vive qui traverse des pensées plus profondes, comme une fête intérieure marquée par des contrastes.</p>
+        <div className="container_profileCardQuote bg-gray-11 w-[320px]">
+            <p>{description}</p>
         </div>
     )
 }

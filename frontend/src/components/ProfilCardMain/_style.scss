@@ -10,17 +10,33 @@
     align-content: center;
     align-items: flex-end;
     position: relative;
-        box-shadow: 101px 240px 73px 0px rgba(112, 121, 210, 0.01), 64px 154px 67px 0px rgba(112, 121, 210, 0.04), 36px 87px 56px 0px rgba(112, 121, 210, 0.15), 16px 38px 42px 0px rgba(112, 121, 210, 0.26), 4px 10px 23px 0px rgba(112, 121, 210, 0.29);
+    overflow: visible;
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        box-shadow: 101px 240px 73px rgba(112, 121, 210, 0.01),
+                    64px 154px 67px rgba(112, 121, 210, 0.04),
+                    36px 87px 56px rgba(112, 121, 210, 0.15),
+                    16px 38px 42px rgba(112, 121, 210, 0.26),
+                    4px 10px 23px rgba(112, 121, 210, 0.29);
+    }
     &--circle{
-        margin: 110px 0;
+        margin: 160px 0 110px 0;
         width: 210px;
         height: 210px;
         border-radius: 120px;
+        animation: rotateCircle 20s linear infinite;
     }
     &--session{
+        position: absolute;
         display: flex;
         flex-direction: column;
         align-items: flex-end;
+        bottom: 20px;
+        right: 16px;
     }
     &--blurCard{
         position: absolute;
@@ -36,4 +52,16 @@
         flex-direction: column;
         justify-content: space-between;
     }
+}
+
+
+@keyframes chaoticSpin {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(60deg); }
+  25% { transform: rotate(120deg); }
+  35% { transform: rotate(90deg); }
+  50% { transform: rotate(180deg); }
+  65% { transform: rotate(250deg); }
+  80% { transform: rotate(270deg); }
+  100% { transform: rotate(360deg); }
 }
