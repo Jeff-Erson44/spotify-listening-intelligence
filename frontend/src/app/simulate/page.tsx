@@ -10,7 +10,7 @@ interface Artist {
   id: string;
   name: string;
   genres: string[];
-  image?: { url: string }[];
+  image?: string;
 }
 
 export default function SimulatePage() {
@@ -82,7 +82,7 @@ export default function SimulatePage() {
       <div className="sm:app-grid">
           <div className="flex col-start-4 col-end-10 flex-column justify-center px-4 flex-col gap-2">
             {results.map((artist) => (
-            <ArtistSearchSelect key={artist.id} artist={artist} onSelect={handleSelect} className=""/>
+            <ArtistSearchSelect key={artist.id} artist={artist} onSelect={handleSelect} />
           ))}
         </div>
       </div>
@@ -130,7 +130,7 @@ export default function SimulatePage() {
                 if (!sessionId) return;
 
                 const { extractSimulated } = await import("@/lib/api/extract-simulate");
-                const result = await extractSimulated(selectedArtists, sessionId);
+                const result = await extractSimulated(sessionId, selectedArtists);
                 console.log("Extract simulated result:", result);
 
                 localStorage.removeItem("selectedArtists");
