@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSpotifyAuth } from "@/hook/useSpotifyAuth";
 import { useSession } from "@/hook/useSession";
@@ -13,7 +13,7 @@ const scopes = [
   "user-read-private",
 ];
 
-export default function SpotifyLogin() {
+function SpotifyLoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
@@ -92,5 +92,13 @@ export default function SpotifyLogin() {
         </>
       )}
     </div>
+  );
+}
+
+export default function SpotifyLogin() {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <SpotifyLoginInner />
+    </Suspense>
   );
 }
