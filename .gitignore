@@ -58,8 +58,7 @@ build/
 *.iws
 .idea/
 
-# Test coverage
-coverage/
+app_local/*
 
 # Mac OS
 .DS_Store
