@@ -8,7 +8,6 @@ import ProfilCardQuote from "@/components/ProfilCardQuote/ProfilCardQuote";
 
 export default function ProfilePage() {
   const [data, setData] = useState<ProfileData | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let attempts = 0;
@@ -16,11 +15,9 @@ export default function ProfilePage() {
     const delay = 1500; 
 
     const fetchData = () => {
-      setError(null);
       const sessionId = localStorage.getItem('sessionId');
       console.log("Session ID from localStorage:", sessionId);
       if (!sessionId) {
-        setError("Session ID not found in localStorage");
         return;
       }
 
@@ -30,8 +27,6 @@ export default function ProfilePage() {
           if (attempts < maxAttempts && e.message.includes("404")) {
             attempts++;
             setTimeout(fetchData, delay);
-          } else {
-            setError(e.message);
           }
         });
     };

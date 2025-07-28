@@ -10,17 +10,6 @@ export function useSpotifyAuth() {
   const [loadingToken, setLoadingToken] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const code = localStorage.getItem("spotify_oauth_code");
-    setOauthCode(code);
-  }, []);
-
-  useEffect(() => {
-    if (oauthCode && !accessToken && !loadingToken) {
-      fetchAccessToken();
-    }
-  }, [oauthCode]);
-
   const fetchAccessToken = useCallback(async () => {
     if (!oauthCode) return;
     setLoadingToken(true);
@@ -49,12 +38,27 @@ export function useSpotifyAuth() {
       const data = await res.json();
       setAccessToken(data.access_token);
       localStorage.setItem("spotify_access_token", data.access_token);
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de la récupération du token");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erreur lors de la récupération du token");
+      }
     } finally {
       setLoadingToken(false);
     }
   }, [oauthCode]);
+
+  useEffect(() => {
+    const code = localStorage.getItem("spotify_oauth_code");
+    setOauthCode(code);
+  }, []);
+
+  useEffect(() => {
+    if (oauthCode && !accessToken && !loadingToken) {
+      fetchAccessToken();
+    }
+  }, [oauthCode, accessToken, loadingToken, fetchAccessToken]);
 
   return {
     oauthCode,

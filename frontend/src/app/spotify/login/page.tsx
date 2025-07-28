@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSpotifyAuth } from "@/hook/useSpotifyAuth";
 import { useSession } from "@/hook/useSession";
 import { extractUser } from "@/lib/api/extract-user";
-import Loading from "@/components/Loading";
 
 const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 const redirectUri = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI;
@@ -18,14 +17,14 @@ export default function SpotifyLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
-  const { accessToken, fetchAccessToken, error: authError, loadingToken } = useSpotifyAuth();
+  const { accessToken, fetchAccessToken } = useSpotifyAuth();
   const [loadingExtract, setLoadingExtract] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sessionId = useSession();
 
   useEffect(() => {
     if (code && !accessToken) {
-      fetchAccessToken(code);
+      fetchAccessToken();
     }
   }, [code, accessToken, fetchAccessToken]);
 
@@ -48,8 +47,12 @@ export default function SpotifyLogin() {
     try {
       await extractUser(sessionId, accessToken);
       router.push("/profile");
-    } catch (err: any) {
-      setError(err.message || "Erreur inconnue lors de l'extraction");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erreur inconnue lors de l'extraction");
+      }
     } finally {
       setLoadingExtract(false);
     }

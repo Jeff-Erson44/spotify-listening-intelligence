@@ -1,8 +1,7 @@
-import { useRouter } from "next/navigation";
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export async function extractSimulated(artists: any[], sessionId: string) {
+type Artist = { id: string; name: string; image?: { url: string }[]; genres?: string[] };
+export async function extractSimulated(artists: Artist[]) {
   const session_id = localStorage.getItem("sessionId")
 
   if (!session_id) {

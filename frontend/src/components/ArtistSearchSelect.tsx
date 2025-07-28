@@ -1,10 +1,10 @@
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Artist {
   id: string;
   name: string;
   genres: string[];
-  image?: { src: string }[];
+  image?: string;
 }
 
 export default function ArtistSearchSelect({ artist,onSelect,}: {
@@ -19,7 +19,7 @@ export default function ArtistSearchSelect({ artist,onSelect,}: {
     >
       <div className="flex justify-between items-center gap-4">
         {artist.image && artist.image.length > 0 && (
-          <img
+          <Image
             src={artist.image}
             alt={artist.name}
             width={40}

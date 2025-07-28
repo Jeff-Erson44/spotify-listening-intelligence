@@ -1,7 +1,7 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { searchArtists } from "@/lib/api/search";
 import ArtistSearchInput from "@/components/ArtistSearchInput/ArtistSearchInput";
 import ArtistSearchSelect from "@/components/ArtistSearchSelect";
@@ -60,7 +60,7 @@ export default function SimulatePage() {
   return (
     <main className="">
       <h1 className="sm:text-5xl text-[24px] Sfpro-medium text-center mt-[100px] mb-4">Ton profil, à partir de tes artistes.</h1>
-      <h2 className="sm:text-xl text-sm text-center text-gray-666 px-[32px]">Ajoute quelques artistes que tu écoutes régulièrement. On s'occupe du reste</h2>
+      <h2 className="sm:text-xl text-sm text-center text-gray-666 px-[32px]">Ajoute quelques artistes que tu écoutes régulièrement. On s&apos;occupe du reste</h2>
 
       <div className="flex items-center gap-4 my-8 justify-center px-8">
         <ArtistSearchInput
@@ -94,7 +94,7 @@ export default function SimulatePage() {
           {selectedArtists.map((artist) => (
             <div key={artist.id} className="flex flex-col items-center">
               {artist.image && typeof artist.image === "string" && (
-                <img
+                <Image
                   src={artist.image}
                   alt={artist.name}
                   width={80}
