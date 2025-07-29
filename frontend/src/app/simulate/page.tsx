@@ -127,12 +127,12 @@ export default function SimulatePage() {
                 if (!sessionId) return;
 
                 const { extractSimulated } = await import("@/lib/api/extract-simulate");
-                const result = await extractSimulated(sessionId, selectedArtists);
+                await extractSimulated(sessionId, selectedArtists);
 
                 localStorage.removeItem("selectedArtists");
                 setSelectedArtists([]);
                 router.push("/profile");
-              } catch (error) {
+              } catch {
               }
             }}
           >

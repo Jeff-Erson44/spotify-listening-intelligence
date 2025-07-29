@@ -25,6 +25,9 @@ export default function ArtistSearchSelect({ artist,onSelect,}: {
             width={40}
             height={40}
             className="w-[40px] h-[40px] rounded-xl object-cover"
+            style={{
+              boxShadow: "0px 4px 9.7px rgba(0, 0, 0, 0.25)",
+            }}
           />
         )}
         </div>

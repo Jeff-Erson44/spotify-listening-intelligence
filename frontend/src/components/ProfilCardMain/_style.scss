@@ -52,6 +52,15 @@
         flex-direction: column;
         justify-content: space-between;
     }
+    @media screen and (max-width:640px){
+        &::before {
+            box-shadow: 101px 240px 73px rgba(112, 121, 210, 0.005),
+                        64px 154px 67px rgba(112, 121, 210, 0.02),
+                        36px 87px 56px rgba(112, 121, 210, 0.075),
+                        16px 38px 42px rgba(112, 121, 210, 0.13),
+                        4px 10px 23px rgba(112, 121, 210, 0.145);
+        }
+    }
 }
 
 

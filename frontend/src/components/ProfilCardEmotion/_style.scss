@@ -16,4 +16,13 @@
             }
         }
     }
+    @media (max-width: 768px) {
+    box-shadow: 
+      101px 240px 73px 0px rgba(112, 121, 210, 0.005),
+      64px 154px 67px 0px rgba(112, 121, 210, 0.02),
+      36px 87px 56px 0px rgba(112, 121, 210, 0.075),
+      16px 38px 42px 0px rgba(112, 121, 210, 0.13),
+      4px 10px 23px 0px rgba(112, 121, 210, 0.145);
+  }
 }
+

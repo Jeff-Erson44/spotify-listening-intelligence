@@ -11,6 +11,10 @@ export default function ArtistCard({src}: ArtistCardProps) {
             width={320}
             alt="image d'un artiste pour illustrer le concept"
             className="object-cover rounded-lg border-[5px] border-[#E0E0E080] max-w-[300px] max-h-[300px] sm:max-w-[320px] sm:max-h-[320px]"
+            style={{
+                boxShadow:
+                    "0 -168px 47px 0 rgba(0, 0, 0, 0.00), 0 -108px 43px 0 rgba(0, 0, 0, 0.01), 0 -61px 36px 0 rgba(0, 0, 0, 0.05), 0 -27px 27px 0 rgba(0, 0, 0, 0.09), 0 -7px 15px 0 rgba(0, 0, 0, 0.10)",
+                }}
         />
     )
 }

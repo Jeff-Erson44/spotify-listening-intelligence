@@ -58,7 +58,7 @@ build/
 *.iws
 .idea/
 
-app_local/*
+/app_local/*
 
 # Mac OS
 .DS_Store

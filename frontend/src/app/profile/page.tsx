@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
-import Loading from "@/components/Loading";
+import Loading from "@/components/Loading/Loading";
 import { fetchUserProfile, ProfileData } from "@/lib/api/profile";
 import ProfilCardMain from "@/components/ProfilCardMain/ProfilCardMain";
 import ProfilCardEmotion from "@/components/ProfilCardEmotion/ProfilCardEmotion";
@@ -43,7 +43,7 @@ export default function ProfilePage() {
       {data && (
         <>
           <h1 className="sm:text-5xl text-[24px] Sfpro-medium text-center mt-[100px] mb-4 col-span-12">Émotions dominantes de ta musique</h1>
-          <h2 className="sm:text-xl text-sm text-center text-gray-666 px-[32px] mb-8 col-span-12">Chaque couleur reflète une facette de ton univers sonore. Voici ce qu’on y lit.</h2>
+          <h2 className="sm:text-xl text-sm text-center text-gray-666 px-[32px] mb-12 col-span-12">Chaque couleur reflète une facette de ton univers sonore. Voici ce qu’on y lit.</h2>
 
           <div className="flex gap-4 justify-center flex-wrap">
             <ProfilCardMain

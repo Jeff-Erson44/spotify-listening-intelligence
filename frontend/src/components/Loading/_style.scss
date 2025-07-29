@@ -1,0 +1,17 @@
+.animated-text {
+  background: linear-gradient(to right, black 50%, #d1d1d1 50%);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: fillText 5.2s linear forwards;
+}
+
+@keyframes fillText {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}

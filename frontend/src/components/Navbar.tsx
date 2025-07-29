@@ -11,7 +11,10 @@ export default function Navbar (){
                     </Link>
                 </li>
                 <li>
-                    <span aria-label="Spotify Listening Intelligence">SLI</span>
+                    <span 
+                        aria-label="Spotify Listening Intelligence"
+                        className="hidden sm:block"
+                    >SLI</span>
                 </li>
                 <li>
                     <Link href={"https://bento.me/jeffersonk"}>
