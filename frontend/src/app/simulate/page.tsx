@@ -28,7 +28,6 @@ export default function SimulatePage() {
   const handleSearch = async (value: string) => {
     try {
       const data = await searchArtists(value);
-      console.log("Résultats de la recherche :", data);
       setResults(data);
     } catch (error) {
       console.error("Erreur de recherche :", error);
@@ -49,8 +48,6 @@ export default function SimulatePage() {
     const stored = JSON.parse(localStorage.getItem("selectedArtists") || "[]");
     const updated = [...stored, selected];
     localStorage.setItem("selectedArtists", JSON.stringify(updated));
-
-    console.log("Artiste ajouté au localStorage :", selected);
 
     setSelectedArtists((prev) => [...prev, artist]);
     setQuery("");
@@ -131,13 +128,11 @@ export default function SimulatePage() {
 
                 const { extractSimulated } = await import("@/lib/api/extract-simulate");
                 const result = await extractSimulated(sessionId, selectedArtists);
-                console.log("Extract simulated result:", result);
 
                 localStorage.removeItem("selectedArtists");
                 setSelectedArtists([]);
                 router.push("/profile");
               } catch (error) {
-                console.error("Erreur extraction simulée", error);
               }
             }}
           >

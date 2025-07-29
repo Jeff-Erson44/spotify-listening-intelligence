@@ -16,7 +16,6 @@ export async function fetchUserProfile(sessionId: string): Promise<ProfileData> 
     throw new Error("Session ID not found in localStorage");
   }
 
-  console.log("Sending session_id in body:", sessionId);
   const response = await fetch(`${API_BASE_URL}get-user`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

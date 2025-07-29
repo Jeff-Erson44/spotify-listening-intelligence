@@ -16,7 +16,6 @@ export default function ProfilePage() {
 
     const fetchData = () => {
       const sessionId = localStorage.getItem('sessionId');
-      console.log("Session ID from localStorage:", sessionId);
       if (!sessionId) {
         return;
       }

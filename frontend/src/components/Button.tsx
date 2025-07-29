@@ -14,7 +14,6 @@ export default function Button({ text, mode, variant ="primary" }: ButtonProps) 
   const handleClick = async () => {
     localStorage.removeItem("sessionId");
     const { sessionId } = await createSession();
-    console.log("New sessionId:", sessionId);
     localStorage.setItem("sessionId", sessionId);
     router.push(mode === "spotify" ? "/spotify/login" : "/simulate");
   };
