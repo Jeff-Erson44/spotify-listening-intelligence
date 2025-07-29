@@ -69,23 +69,26 @@ function SpotifyLoginInner() {
           <h2 className="sm:text-xl text-sm text-center text-gray-666 px-[32px] mb-8 col-span-12">
             Connexion 100 % sécurisée via Spotify. Aucune donnée n’est stockée, aucun mot de passe requis.
           </h2>
-          <button
-            onClick={handleLogin}
-            className="px-6 py-4 bg-black text-white rounded-xl hover:bg-gray-800 transition w-[250px]"
-          >
-            Se connecter avec Spotify
-          </button>
+          <div className="col-span-12 flex justify-center items-center mt-4">
+            <button
+              onClick={handleLogin}
+              className="px-6 py-4 bg-black text-white rounded-xl hover:bg-gray-800 transition w-[250px]"
+            >
+              Se connecter avec Spotify
+            </button>
+          </div>
         </>
       ) : (
         <>
-          <h3 className="text-center text-gray-500 mb-6">Vous êtes connecté !</h3>
-          <button
-            onClick={handleExtractUser}
-            disabled={loadingExtract}
-            className="px-6 py-4 text-white bg-black rounded-xl hover:bg-gray-800 transition w-[250px]"
-          >
-            {loadingExtract ? "Extraction en cours..." : "Générer mon profil"}
-          </button>
+          <div className="col-span-12 flex justify-center items-center mt-4">
+            <button
+              onClick={handleExtractUser}
+              disabled={loadingExtract}
+              className="px-6 py-4 text-white bg-black rounded-xl hover:bg-gray-800 transition w-[250px]"
+            >
+              {loadingExtract ? "Début de l'extraction..." : "Générer mon profil"}
+            </button>
+          </div>
           {error && (
             <p className="text-red-500 text-sm mt-4">{error}</p>
           )}
