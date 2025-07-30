@@ -5,6 +5,7 @@ import { fetchUserProfile, ProfileData } from "@/lib/api/profile";
 import ProfilCardMain from "@/components/ProfilCardMain/ProfilCardMain";
 import ProfilCardEmotion from "@/components/ProfilCardEmotion/ProfilCardEmotion";
 import ProfilCardQuote from "@/components/ProfilCardQuote/ProfilCardQuote";
+import Link from 'next/link'
 
 export default function ProfilePage() {
   const [data, setData] = useState<ProfileData | null>(null);
@@ -63,12 +64,12 @@ export default function ProfilePage() {
             </div>
           </div>
           <div className="w-full flex justify-center mt-12 mb-8">
-            <a
-              href="/"
+            <Link
+              href={"/"}
               className="px-6 py-4 bg-black text-white rounded-xl hover:bg-gray-800 transition max-w-[250px]"
             >
               Revenir à l’accueil
-            </a>
+            </Link>
           </div>
           <p className="text-gray-300 text-xs relative bottom-2 left-[16px]">
             Design with <span className="text-red-400">♥</span> by <a href="https://www.instagram.com/kitana.ht/" target="_blank" className="underline hover:text-white">Kitana</a> & developed by <a href="https://jefferson-k.com" target="_blank" className="underline hover:text-white">Jefferson.K</a>
