@@ -15,7 +15,7 @@ export default function Loading() {
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-white">
       <h1 className="text-5xl font-bold relative overflow-hidden text-center animated-text">
-        <span className="text-fill leading-[64px]">Spotify Listening Intelligence</span>
+        <span className="text-fill leading-[64px]">Listening Intelligence</span>
       </h1>
       <p className="mt-4 text-sm">{`Profil généré à ${progress}%`}</p>
     </div>

@@ -7,14 +7,14 @@ export default function Navbar (){
             <ul className="flex font-semibold justify-between items-center uppercase sfpro-medium text-[10px] tracking-[1.2px] sm:text-xs">
                 <li>
                     <Link href={"/"}>
-                        Spotify<br/>Listening Intelligence
+                        Listening Intelligence
                     </Link>
                 </li>
                 <li>
                     <span 
-                        aria-label="Spotify Listening Intelligence"
+                        aria-label="Listening Intelligence"
                         className="hidden sm:block"
-                    >SLI</span>
+                    >LI</span>
                 </li>
                 <li>
                     <Link href={"https://bento.me/jeffersonk"}>

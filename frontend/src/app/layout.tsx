@@ -4,19 +4,19 @@ import "@/style/globals.css";
 import { SessionProvider } from "@/context/SessionContext";
 
 export const metadata: Metadata = {
-  title: "Spotify Listening Intelligence",
+  title: "Listening Intelligence",
   description: "Analyse musicale avec profil émotionnel",
   openGraph: {
-    title: "Spotify Listening Intelligence",
+    title: "Listening Intelligence",
     description: "Découvrez votre profil émotionnel à travers votre musique",
     url: "https://spotify-listening-gray.vercel.app",
-    siteName: "Spotify Listening Intelligence",
+    siteName: "Listening Intelligence",
     images: [
       {
         url: "https://spotify-listening-gray.vercel.app/images/preview.png", 
         width: 1200,
         height: 630,
-        alt: "Aperçu Spotify Listening Intelligence",
+        alt: "Aperçu Listening Intelligence",
       },
     ],
     locale: "fr_FR",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Spotify Listening Intelligence",
+    title: "Listening Intelligence",
     description: "Analysez vos écoutes musicales pour révéler votre profil émotionnel",
     images: ["https://spotify-listening-gray.vercel.app/images/preview.png"],
   },
