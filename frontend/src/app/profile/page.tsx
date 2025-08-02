@@ -72,7 +72,7 @@ export default function ProfilePage() {
             </Link>
           </div>
           <p className="text-gray-300 text-xs relative bottom-2 left-[16px]">
-            Design with <span className="text-red-400">♥</span> by <a href="https://www.instagram.com/kitana.ht/" target="_blank" className="underline hover:text-white">Kitana</a> & developed by <a href="https://jefferson-k.com" target="_blank" className="underline hover:text-white">Jefferson.K</a>
+            Design with <span className="text-grey-400">♥</span> by <a href="https://www.instagram.com/kitana.ht/" target="_blank" className="underline hover:text-white">Kitana</a> & developed by <a href="https://jefferson-k.com" target="_blank" className="underline hover:text-white">Jefferson.K</a>
           </p>
         </>
       )}
