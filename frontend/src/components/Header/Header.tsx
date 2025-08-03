@@ -10,6 +10,11 @@ export default function Header() {
                 <h2 className="text-center text-sm sm:text-xl">Ce que tu écoutes te définit. Visualise-le.</h2>
                 <div className="flex gap-5 justify-center">
                     <Button
+                    text="Se connecter avec Spotify"
+                    mode="spotify"
+                    variant="primary"
+                    />
+                    <Button
                     text="Générer mon profil musical"
                     mode="simulate"
                     variant="primary"

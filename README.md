@@ -1,52 +1,65 @@
 # Spotify Listening Intelligence
 
-Générez un profil musical personnalisé à partir de vos écoutes récentes ou de vos artistes préférés. Visualisez vos émotions dominantes, vos genres musicaux clés et vos tendances d’écoute, grâce à une interface fluide et moderne.
+Générez un **profil musical personnalisé** à partir d'une sélection d’artistes. Visualisez vos **émotions dominantes**, vos **genres musicaux clés** et vos **tendances d’écoute**, grâce à une interface moderne et animée.
 
-## Démo en ligne
+> ⚠️ **Note importante** : en raison de nouvelles restrictions imposées par Spotify, la version connectée (OAuth) **n’est plus accessible au public**.  
+> Seul le **mode simulation** (sans compte Spotify) est disponible actuellement.
+
+## 🚀 Démo en ligne
 
 👉 [spotify-listening](https://spotify-listening-gray.vercel.app)
 
-## Fonctionnalités
+---
 
-- Connexion sécurisée avec Spotify (OAuth)
-- Mode sans compte Spotify avec sélection manuelle des artistes
-- Extraction et traitement des données audio (features Spotify)
-- Détection des émotions dominantes
-- Génération d’un profil musical visuel et interactif
-- Animation et interface moderne (Next.js, Tailwind, animations GSAP)
+## 🔍 Fonctionnalités
 
-## Architecture Backend (AWS Serverless)
-
-| Service | Rôle |
-|--------|------|
-| **AWS Lambda** | Exécution des fonctions `create-session`, `extract-user`, `extract-simulated`, `search`, `transform`, `generate-profile`, `get-profile` |
-| **API Gateway (HTTP)** | Exposition de toutes les routes HTTP pour le frontend , mise en place du CORS |
-| **Amazon S3** | Stockage des fichiers JSON (données extraites, transformées et profil généré) |
-| **IAM Role** | Permissions spécifiques à chaque Lambda |
-| **Amazon ECR** | Conteneurisation des fonctions Lambda via Docker (runtime Node.js personnalisé) |
-
-Les fonctions sont conteneurisées avec **Docker**, déployées sur **ECR**, puis appelées via **API Gateway**.
-
-## Frontend (Next.js + Tailwind + Animation)
-
-- **Next.js 14** avec App Router (`/app`)
-- **Tailwind CSS** + design responsive mobile-first
-- State management simple avec `localStorage` et `useState`
-- Gestion des sessions via `sessionId` généré automatiquement
-
-Pages principales :
-- `/` → Landing page
-- `/simulate` → Sélection manuelle d’artistes
-- `/spotify` → Connexion + extraction auto
-- `/profile` → Visualisation du profil musical
+- ✅ Mode sans compte Spotify avec sélection manuelle d’artistes
+- ✅ Extraction simulée des données audio (features Spotify)
+- ✅ Détection des émotions musicales dominantes
+- ✅ Génération d’un profil musical visuel, animé et interactif
+- ❌ *(désactivé)* Connexion via Spotify (OAuth) pour extraire les écoutes réelles
+- 💡 Interface moderne avec Next.js, Tailwind
 
 ---
 
-### 8. **Crédits / Remerciements / Inspirations**
+## 🧠 Architecture Backend (AWS Serverless)
 
+| Service        | Rôle                                                                 |
+|----------------|----------------------------------------------------------------------|
+| **AWS Lambda** | Fonctions : `create-session`, `extract-simulated`, `search`, `transform`, `generate-profile`, `get-profile` |
+| **API Gateway**| Exposition de routes HTTP, CORS                                      |
+| **Amazon S3**  | Stockage des données JSON (simulées et résultats de profil)          |
+| **IAM Role**   | Gestion fine des permissions par fonction                            |
+| **Amazon ECR** | Conteneurisation Docker des fonctions Lambda                         |
 
-## Crédits
+---
 
-- API Spotify Web
-- Design par @[Kitana.ht](https://www.instagram.com/kitana.ht/)
-- Developpé par @[JeffersonK](https://www.jefferson-k.com/)
+## 💻 Frontend (Next.js 14 + Tailwind)
+
+- **Next.js App Router** (`/app`)
+- **Tailwind CSS** (responsive mobile-first)
+- **LocalStorage** pour le suivi des sessions (`sessionId`)
+- **Pages** :
+  - `/` : Landing page
+  - `/simulate` : Sélection d’artistes
+  - `/profile` : Visualisation du profil généré
+  - `/spotify` : *(désactivée)* Connexion via Spotify (non accessible en production)
+
+---
+
+## 📌 Pourquoi cette limitation avec Spotify ?
+
+Spotify a récemment **renforcé les critères de validation pour l’accès aux données utilisateurs** (écoutes récentes, audio features, etc.).  
+Les applications non vérifiées par Spotify **ne peuvent plus utiliser l’authentification OAuth en production publique**, sauf à inscrire manuellement chaque testeur dans le dashboard développeur.
+
+👉 C’est pourquoi la version actuellement en ligne est **100 % simulée** — mais suit le même pipeline de traitement que la version connectée.
+
+---
+
+## 🙏 Crédits & Remerciements
+
+- API Spotify Web (en mode simulation)
+- Design par [@kitana.ht](https://www.instagram.com/kitana.ht/)
+- Développé par [@JeffersonK](https://www.jefferson-k.com/)
+
+---
