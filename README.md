@@ -1,6 +1,15 @@
-# 🎧 Spotify Listening Intelligence – Data Profile Generator
+# 🎧 Listening Intelligence – Data Profile Generator
 
 Un projet full serverless AWS qui permet d’analyser les préférences musicales à partir d’une sélection d’artistes simulés, et de générer un profil enrichi automatiquement.
+
+⚠️ Note importante : en raison de nouvelles restrictions imposées par Spotify, la version connectée (OAuth) n’est plus accessible au public.
+Seul le mode simulation (sans compte Spotify) est disponible actuellement.
+
+📌 Pourquoi cette limitation avec Spotify ?
+Spotify a récemment renforcé les critères de validation pour l’accès aux données utilisateurs (écoutes récentes, audio features, etc.).
+Les applications non vérifiées par Spotify ne peuvent plus utiliser l’authentification OAuth en production publique, sauf à inscrire manuellement chaque testeur dans le dashboard développeur.
+
+👉 C’est pourquoi la version actuellement en ligne est 100 % simulée — mais suit le même pipeline de traitement que la version connectée.
 
 ---
 
@@ -43,14 +52,19 @@ Un projet full serverless AWS qui permet d’analyser les préférences musicale
 | Service         | Rôle                                                                 |
 |----------------|----------------------------------------------------------------------|
 | **AWS Lambda** | Exécute chaque étape du pipeline ETL (search, extract, transform, etc.) |
-| **API Gateway**| Point d’entrée HTTP exposant toutes les routes frontend ↔ backend    |
+| **API Gateway**| Point d’entrée HTTP exposant toutes les routes frontend ↔ backend, CORS   |
 | **Amazon S3**  | Stockage structuré par session des données extraites, enrichies et du profil |
 | **CloudWatch** | Monitoring (logs, erreurs, suivi) des lambdas                        |
 | **IAM**        | Gestion fine des permissions par fonction                            |
 | **TTL S3**     | Politique d’expiration automatique des données après 24h (gestion coût + confidentialité) |
+| **IAM Role**     | Gestion fine des permissions par fonction |
+| **Amazon ECR**     | Conteneurisation Docker des fonctions Lambda |
+	
+	
 
 - Chaque appel frontend contient un `sessionId` dans le body, utilisé pour isoler les fichiers stockés et les analyser séparément.
 - Le projet est compatible avec le Free Tier AWS.
+
 
 ---
 
@@ -82,9 +96,8 @@ Un projet full serverless AWS qui permet d’analyser les préférences musicale
 
 ---
 
-## 🎥 Vidéo démo + illustration
+## illustration
 
-https://www.loom.com/share/tonlienici
 
 ![Architecture AWS Simulée](./listening.drawio.png)
 
