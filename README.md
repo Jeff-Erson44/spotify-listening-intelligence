@@ -89,6 +89,7 @@ Spotify has tightened its OAuth access policy. Unverified apps can no longer use
   "danceability_avg": 0.76,
   "top_emotions": ["energy", "confidence", "tension"]
 }
+```
 ___
 
 ## ✍️ Project Purpose
